@@ -6,42 +6,175 @@
 \usage{
 punkst_topic_model(
   hex,
-  n_topics = 12,
-  n_epochs = 2,
+  n_topics = NULL,
+  n_epochs = 1L,
+  out_prefix = NULL,
+  seed = -1L,
+  threads = 0L,
+  minibatch_size = 512L,
+  min_count_train = 20L,
+  min_count_per_feature = 1L,
+  include_feature_regex = NULL,
   exclude_feature_regex = NULL,
-  min_count_per_feature = NULL,
-  min_count_train = NULL,
-  seed = 1,
-  threads = default_threads(),
+  icol_weight = -1L,
+  default_weight = -1,
+  modal = 0L,
+  kappa = 0.7,
+  tau0 = 10,
+  alpha = NULL,
+  eta = NULL,
+  max_iter = 100L,
+  mean_change_tol = 0.001,
+  reproducible_init = FALSE,
+  model_prior = NULL,
+  prior_scale = NULL,
+  prior_scale_rel = NULL,
+  projection_only = FALSE,
+  fit_background = FALSE,
+  background_prior = NULL,
+  background_init_scale = 0.5,
+  background_prevalence_power = 0,
+  fix_background = FALSE,
+  bg_fraction_prior_a0 = 2,
+  bg_fraction_prior_b0 = 8,
+  warm_start_epochs = 0.5,
+  adaptive_topics = FALSE,
+  min_topic_mean = 1e-05,
+  adaptive_refit_epochs = 1L,
+  transform = TRUE,
+  sort_topics = FALSE,
+  topk_only = NULL,
+  residuals = FALSE,
+  feature_residuals = FALSE,
+  feature_diagnostics_cheap = FALSE,
+  unit_diagnostics_similarity = FALSE,
+  pseudobulk_all_features = FALSE,
+  count_cache = "auto",
+  count_cache_memory_budget = "1G",
+  temp_dir = NULL,
+  debug = 0L,
+  verbose = 0L,
   bin = NULL,
   overwrite = FALSE
 )
 }
 \arguments{
-\item{hex}{A \code{punkstHex} object from \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}}.}
+\item{hex}{A \code{punkstHex} object from \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}}; it supplies
+\verb{--in-data}, \verb{--in-meta} and \code{--features}.}
 
-\item{n_topics}{Number of topics.}
+\item{n_topics}{Number of topics (\code{--n-topics}). Required unless
+\code{model_prior} is given.}
 
-\item{n_epochs}{Number of training epochs.}
+\item{n_epochs}{Training passes over the data (\code{--n-epochs}).}
 
-\item{exclude_feature_regex}{Regular expression of features to leave out,
-e.g. \code{\link[=xenium_control_regex]{xenium_control_regex()}}. \code{NULL} keeps all features.}
+\item{out_prefix}{Output prefix; default \verb{<workdir>/<hex stem>.k<n_topics>}.}
 
-\item{min_count_per_feature, min_count_train}{Optional filters; \code{NULL} uses
-the punkst defaults.}
+\item{seed}{Random seed (\code{--seed}). The default \code{-1} lets punkst draw a
+random seed, so runs are not reproducible unless you set one.}
 
-\item{seed}{Random seed.}
+\item{threads}{Threads (\code{--threads}); \code{0} lets punkst (TBB) choose.}
 
-\item{threads}{Number of threads.}
+\item{minibatch_size}{Minibatch size (\code{--minibatch-size}).}
+
+\item{min_count_train}{Minimum total count for a unit to be trained on
+(\code{--min-count-train}).}
+
+\item{min_count_per_feature}{Minimum total count for a feature to be kept
+(\code{--min-count-per-feature}).}
+
+\item{include_feature_regex, exclude_feature_regex}{Regular expressions
+selecting features (\code{--include-feature-regex}, \code{--exclude-feature-regex});
+e.g. \code{\link[=xenium_control_regex]{xenium_control_regex()}}.}
+
+\item{icol_weight}{0-based column of per-feature weights in the feature file
+(\code{--icol-weight}); \code{-1} disables weighting.}
+
+\item{default_weight}{Weight for model or prior features missing from the
+feature file (\code{--default-weight}); negative drops them.}
+
+\item{modal}{Modality index (\code{--modal}).}
+
+\item{kappa, tau0}{Online learning decay rate and offset (\code{--kappa},
+\code{--tau0}).}
+
+\item{alpha, eta}{Document-topic and topic-word priors (\code{--alpha}, \code{--eta});
+\code{NULL} uses \code{1/K}.}
+
+\item{max_iter, mean_change_tol}{Per-document inference limits
+(\code{--max-iter}, \code{--mean-change-tol}).}
+
+\item{reproducible_init}{Deterministic per-document initialisation, slower
+(\code{--reproducible-init}).}
+
+\item{model_prior}{File with an initial model matrix for continued
+training (\code{--model-prior}).}
+
+\item{prior_scale, prior_scale_rel}{Scaling of the prior model
+(\code{--prior-scale}, \code{--prior-scale-rel}; the relative one wins).}
+
+\item{projection_only}{Transform with \code{model_prior} and do not train
+(\code{--projection-only}).}
+
+\item{fit_background}{Fit a background component in addition to the topics
+(\code{--fit-background}).}
+
+\item{background_prior}{File with a background prior vector
+(\code{--background-prior}).}
+
+\item{background_init_scale, background_prevalence_power, fix_background, }{bg_fraction_prior_a0,bg_fraction_prior_b0,warm_start_epochs Background
+model settings (\code{--background-init-scale}, \code{--background-prevalence-power},
+\code{--fix-background}, \code{--bg-fraction-prior-a0}, \code{--bg-fraction-prior-b0},
+\code{--warm-start-epochs}).}
+
+\item{adaptive_topics}{Treat \code{n_topics} as an upper bound, prune unused
+topics and refit (\code{--adaptive-topics}).}
+
+\item{min_topic_mean, adaptive_refit_epochs}{Adaptive fitting settings
+(\code{--min-topic-mean}, \code{--adaptive-refit-epochs}).}
+
+\item{transform}{Transform the data to topic space after fitting
+(\code{--transform}); needed for the results and pseudobulk files.}
+
+\item{sort_topics}{Sort topics by weight (\code{--sort-topics}).}
+
+\item{topk_only}{If set, write only the top-k topics per unit to the
+results file (\code{--topk-only}).}
+
+\item{residuals, feature_residuals, feature_diagnostics_cheap, }{unit_diagnostics_similarity,pseudobulk_all_features Diagnostic and output
+options (flags of the same names).}
+
+\item{count_cache, count_cache_memory_budget}{Repeated-pass count cache
+(\code{--count-cache}: \code{"off"}, \code{"on"}, \code{"auto"}; \code{--count-cache-memory-budget}
+with K, M or G suffixes).}
+
+\item{temp_dir}{Parent directory for temporary files (\code{--temp-dir}); \code{NULL}
+uses the system temporary directory.}
+
+\item{debug}{If > 0, process only this many units (\code{--debug}).}
+
+\item{verbose}{Verbosity (\code{--verbose}).}
 
 \item{bin}{Path to \code{punkst}; see \code{\link[=punkst_setup]{punkst_setup()}}.}
 
-\item{overwrite}{Re-run even if up to date.}
+\item{overwrite}{Re-run even if the manifest shows the stage is up to date.}
 }
 \value{
-A \code{punkstModel} stage object with \code{files$model} (genes x topics),
-\code{files$results} (per-hexagon topic probabilities) and others.
+A \code{punkstModel} stage object. \code{files} holds \code{model} (features x
+topics) and \code{state} always, plus \code{results} (per-unit topic proportions)
+and \code{pseudobulk} when the transform ran, and \code{unit_stats} when
+\code{residuals} is on.
 }
 \description{
-Fit a topic model to hexagon data (\verb{punkst topic-model})
+Exposes the options of \verb{punkst topic-model} that apply to hexagon input
+(the 10X input options and \code{--dataset-id} are not applicable). Defaults are
+punkst's own, taken from its source (\code{script/fit_lda.cpp}) and docs, and an
+option is passed on the command line only when it differs from its default,
+so punkst's behaviour is unchanged unless you ask for it. Options whose
+default is "unset" (for example \code{alpha}, which punkst sets to \code{1/K}) are
+\code{NULL}.
+}
+\details{
+One deliberate difference: punkst does not run the transform by default,
+but the results file is what most users need, so \code{transform = TRUE} here.
+Note also that punkst does not sort topics unless \code{sort_topics = TRUE}.
 }

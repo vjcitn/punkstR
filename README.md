@@ -49,11 +49,14 @@ run <- run_punkst_pipeline(
     "data.zarr", workdir = "xenium_run",
     export = list(coordinate_system = "intrinsic", min_qv = 20),
     hex_grid_dist = 12, n_topics = 12,
-    exclude_feature_regex = xenium_control_regex())
+    topic_model = list(n_epochs = 2, sort_topics = TRUE,
+                       exclude_feature_regex = xenium_control_regex()))
 run$model$files$results   # per-hexagon topic probabilities
 ```
 
-or call the stages one at a time (`sdata_export()`, `punkst_pts2tiles()`,
+`punkst_topic_model()` exposes the options of `punkst topic-model` for hexagon input, with punkst's own defaults (see `?punkst_topic_model`).
+
+You can also call the stages one at a time (`sdata_export()`, `punkst_pts2tiles()`,
 `punkst_tiles2hex()`, `punkst_topic_model()`), each taking the previous stage's
 result. Each stage writes a log in `workdir`, and a manifest records its
 parameters and inputs; re-running skips stages whose outputs exist and whose

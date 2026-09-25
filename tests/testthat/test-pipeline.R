@@ -4,6 +4,20 @@ test_that("stage wrappers fail clearly on bad inputs", {
     expect_error(punkst_tiles2hex(list()), "inherits")
 })
 
+test_that("topic_model builds arguments and validates inputs", {
+    expect_equal(punkstR:::opt_arg(character(), "--x", 1L, 1L), character())
+    expect_equal(punkstR:::opt_arg(character(), "--x", 2L, 1L), c("--x", 2L))
+    expect_equal(punkstR:::opt_arg("a", "--f", TRUE), c("a", "--f"))
+    expect_equal(punkstR:::opt_arg("a", "--f", FALSE), "a")
+    expect_equal(punkstR:::opt_arg("a", "--n", NULL), "a")
+    hex <- structure(list(workdir = tempdir(), files = list(
+        data = "h.txt", meta = "h.json", features = "f.tsv")),
+        class = c("punkstHex", "punkstStage"))
+    expect_error(punkst_topic_model(hex, bin = "/bin/sh"), "n_topics")
+    expect_error(punkst_topic_model(hex, n_topics = 2, projection_only = TRUE,
+                                    bin = "/bin/sh"), "model_prior")
+})
+
 test_that("run_stage skips when up to date and reruns when params change", {
     wd <- tempfile(); dir.create(wd)
     inp <- file.path(wd, "in.txt"); writeLines("a", inp)
@@ -34,7 +48,7 @@ test_that("full pipeline separates the two structured regions", {
     wd <- tempfile()
     run <- suppressMessages(run_punkst_pipeline(
         zarr, wd, tile_size = 100, hex_grid_dist = 12, min_count = 5,
-        n_topics = 2, n_epochs = 5, min_count_train = 5, threads = 2,
+        n_topics = 2, topic_model = list(n_epochs = 5, min_count_train = 5), threads = 2,
         export = list(coordinate_system = NULL)))
     expect_s3_class(run, "punkstRun")
     expect_true(all(file.exists(unlist(run$model$files))))
@@ -48,6 +62,6 @@ test_that("full pipeline separates the two structured regions", {
     # second call reuses everything
     expect_message(run_punkst_pipeline(
         zarr, wd, tile_size = 100, hex_grid_dist = 12, min_count = 5,
-        n_topics = 2, n_epochs = 5, min_count_train = 5, threads = 2,
+        n_topics = 2, topic_model = list(n_epochs = 5, min_count_train = 5), threads = 2,
         export = list(coordinate_system = NULL)), "up to date")
 })

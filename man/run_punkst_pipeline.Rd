@@ -11,11 +11,8 @@ run_punkst_pipeline(
   tile_size = 500,
   hex_grid_dist = 12,
   min_count = 20,
-  n_topics = 12,
-  n_epochs = 2,
-  exclude_feature_regex = NULL,
-  min_count_per_feature = NULL,
-  min_count_train = NULL,
+  n_topics,
+  topic_model = list(),
   seed = 1,
   threads = default_threads(),
   bin = NULL,
@@ -30,8 +27,10 @@ run_punkst_pipeline(
 
 \item{export}{A list of extra arguments for \code{\link[=sdata_export]{sdata_export()}}.}
 
-\item{tile_size, hex_grid_dist, min_count, n_topics, n_epochs, }{exclude_feature_regex,min_count_per_feature,min_count_train,seed,threads
-See the individual stage functions.}
+\item{tile_size, hex_grid_dist, min_count, n_topics, seed, threads}{See the individual stage functions.}
+
+\item{topic_model}{A list of further arguments for \code{\link[=punkst_topic_model]{punkst_topic_model()}},
+e.g. \code{list(n_epochs = 2, exclude_feature_regex = xenium_control_regex())}.}
 
 \item{bin, python}{See \code{\link[=punkst_setup]{punkst_setup()}}.}
 
