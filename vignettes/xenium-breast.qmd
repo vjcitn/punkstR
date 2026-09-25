@@ -1,0 +1,500 @@
+---
+title: "Pixel-level factor analysis of a Xenium breast cancer section from R"
+vignette: >
+  %\VignetteIndexEntry{Xenium breast cancer walkthrough}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+format:
+  html:
+    toc: true
+    embed-resources: true
+execute:
+  warning: false
+---
+
+This vignette drives the whole `punkst` workflow from R on a real Xenium breast
+cancer section (about 42 million transcripts, a 313-gene panel) stored as a
+SpatialData zarr store, and asks whether the learned factors recover recognisable
+tissue compartments. Everything is done with punkstR functions and base R. The
+package runs the `punkst` binary and a small export script with `system2()`; no
+Python is called from this document.
+
+**Requirements.** The chunks run only when all of these are available, and are
+otherwise shown without being evaluated:
+
+- `PUNKSTR_DEMO_ZARR`: path to the demonstration SpatialData store (a zarr v3
+  store, so the Python that punkstR uses needs `spatialdata` >= 0.7).
+- A built `punkst` binary (`PUNKST=/path/to/punkst`, or on the `PATH`). punkstR
+  does not build it; see the README for the recipe.
+- A Python with `spatialdata` (`PUNKST_PYTHON=/path/to/python`).
+- Optionally `PUNKSTR_DEMO_WORKDIR`: a directory that keeps the intermediate
+  files (about 2 GB), so re-rendering skips finished stages.
+
+```{r}
+#| label: setup
+library(punkstR)
+
+zarr <- Sys.getenv("PUNKSTR_DEMO_ZARR")
+chk <- check_punkst_setup(quiet = TRUE)
+can_run <- nzchar(zarr) && dir.exists(zarr) && chk$bin_ok && chk$python_ok
+knitr::opts_chunk$set(eval = can_run, fig.width = 8, fig.height = 6, dpi = 110)
+if (!can_run) message("Demo not evaluated: set PUNKSTR_DEMO_ZARR and check_punkst_setup().")
+
+work <- Sys.getenv("PUNKSTR_DEMO_WORKDIR")
+if (!nzchar(work)) work <- tempfile("punkstR_xenium_")
+dir.create(work, showWarnings = FALSE, recursive = TRUE)
+threads <- min(8L, parallel::detectCores())
+```
+
+```{r}
+#| label: helpers
+#| eval: true
+# Small base-graphics helpers: one square marker per hexagon.
+scale_col <- function(v, pal, vmin = min(v), vmax = max(v))
+    pal[1L + round(pmin(pmax((v - vmin) / (vmax - vmin), 0), 1) * (length(pal) - 1L))]
+
+spatial_plot <- function(x, y, col, main = "", cex = 0.12,
+                         xlab = "x (um)", ylab = "y (um)", ...) {
+    plot(x, y, col = col, pch = 15, cex = cex, asp = 1, ylim = rev(range(y)),
+         xlab = xlab, ylab = ylab, main = main, ...)
+}
+
+heat <- function(m, main = "", zlim = range(m), pal = hcl.colors(50, "viridis"),
+                 cex_row = 0.8, cex_col = 0.7) {
+    op <- par(mar = c(9, 12, 2, 1)); on.exit(par(op))
+    image(seq_len(ncol(m)), seq_len(nrow(m)), t(m[nrow(m):1, , drop = FALSE]),
+          col = pal, zlim = zlim, axes = FALSE, xlab = "", ylab = "", main = main)
+    axis(1, seq_len(ncol(m)), colnames(m), las = 2, cex.axis = cex_col, tick = FALSE)
+    axis(2, seq_len(nrow(m)), rev(rownames(m)), las = 1, cex.axis = cex_row, tick = FALSE)
+    box()
+}
+```
+
+## 1. What is in the store?
+
+`sdata_info()` summarises the store without loading the transcripts into R.
+
+```{r}
+info <- sdata_info(zarr, points_key = "transcripts")
+tx <- info$points$transcripts
+cat("SpatialData", info$spatialdata_version, "\n")
+cat("points elements:", paste(names(info$points), collapse = ", "), "\n")
+cat("images:", paste(names(info$images), collapse = ", "), "\n")
+cat("tables:", paste(unlist(info$tables), collapse = ", "), "\n")
+cat(sprintf("transcripts: %s rows; columns: %s\n", format(tx$rows, big.mark = ","),
+            paste(unlist(tx$columns), collapse = ", ")))
+```
+
+## 2. Which coordinates does punkst need?
+
+punkst works in microns. The `transcripts` element is registered in a single
+coordinate system, `global`, through a scale transform, so exporting "the only
+coordinate system" would silently change the units.
+
+```{r}
+g <- tx$transformations$global
+scale <- g$scale[[1]]
+um_per_px <- 1 / scale
+width_px <- info$images$morphology_focus$sizes$x
+cat("transform into 'global':", g$repr, "\n")
+cat(sprintf("implied pixel size: %.4f um / px\n", um_per_px))
+cat(sprintf("max stored x: %s\n", format(round(tx$max_x), big.mark = ",")))
+cat(sprintf("image width:  %s px -> %s um at %.4f um/px\n",
+            format(width_px, big.mark = ","),
+            format(round(width_px * um_per_px), big.mark = ","), um_per_px))
+```
+
+The stored `x` maximum matches the image width *in microns*, so the stored
+(intrinsic) coordinates are microns and `global` is image pixels.
+`sdata_export()` therefore uses `coordinate_system = "intrinsic"` by default.
+
+## 3. Export transcripts
+
+We keep molecules with `qv >= 20`, the usual Xenium cut-off. Only `x`, `y` and
+the feature name are written.
+
+```{r}
+tsv <- file.path(work, "transcripts.tsv")
+system.time(sdata_export(zarr, tsv, coordinate_system = "intrinsic", min_qv = 20))
+```
+
+## 4. `pts2tiles`
+
+```{r}
+tiles <- punkst_pts2tiles(tsv, work, tile_size = 500, threads = threads)
+feat <- punkst_read_features(tiles)
+control_re <- xenium_control_regex()
+is_ctrl <- grepl(control_re, feat$feature)
+n_kept <- sum(feat$count)
+cat(sprintf("kept %s of %s transcripts (%.1f%%) with qv >= 20\n",
+            format(n_kept, big.mark = ","), format(tx$rows, big.mark = ","),
+            100 * n_kept / tx$rows))
+cat(sprintf("%d features: %d genes, %d control probes/codewords\n",
+            nrow(feat), sum(!is_ctrl), sum(is_ctrl)))
+cat(sprintf("control features hold %.2f%% of transcripts\n",
+            100 * sum(feat$count[is_ctrl]) / sum(feat$count)))
+```
+
+## 5. `tiles2hex`
+
+Transcripts are pooled into non-overlapping hexagons with a 12 µm centre-to-centre
+spacing. We keep hexagons with at least 20 transcripts and randomise their order,
+which online training benefits from.
+
+```{r}
+hex <- punkst_tiles2hex(tiles, hex_grid_dist = 12, min_count = 20,
+                        randomize = TRUE, seed = 1, threads = threads)
+hx <- punkst_read_hex(hex)
+units <- hx$units
+X <- hx$counts
+dictionary <- colnames(X)
+cat(sprintf("%s hexagons; median %.0f transcripts per hexagon\n",
+            format(nrow(units), big.mark = ","), median(units$total)))
+cat(sprintf("hexagon x gene matrix: %d x %d, %s nonzeros\n",
+            nrow(X), ncol(X), format(length(X@x), big.mark = ",")))
+```
+
+The transcript density of the whole section, one point per hexagon:
+
+```{r}
+#| fig-height: 6.6
+pal <- hcl.colors(100, "Inferno")
+lt <- log10(units$total)
+spatial_plot(units$x, units$y, scale_col(lt, pal), cex = 0.14,
+             main = sprintf("Transcripts per 12 um hexagon (log10, %.1f to %.1f)",
+                            min(lt), max(lt)))
+```
+
+## 6. `topic-model`
+
+Twelve factors, with control probes excluded from the feature space.
+
+```{r}
+model <- punkst_topic_model(hex, n_topics = 12, n_epochs = 2, sort_topics = TRUE,
+                            min_count_per_feature = 100, min_count_train = 20,
+                            exclude_feature_regex = control_re,
+                            transform = TRUE, threads = threads, seed = 1)
+B <- punkst_read_model(model)          # genes x topics
+res <- punkst_read_topics(model)       # hexagons x topics
+K <- ncol(B)
+tcols <- colnames(B)
+cat(sprintf("model: %d genes x %d topics; results: %s hexagons\n",
+            nrow(B), K, format(nrow(res), big.mark = ",")))
+stopifnot(K == 12, nrow(res) > 100000)
+```
+
+### Interpreting the factors
+
+Each topic's top genes are those that are both abundant in the topic and specific
+to it. To name the topics we score each one against a small set of marker genes
+for breast tissue compartments. These sets were written by hand after looking at
+the topics, so this is a heuristic labelling for orientation only; a
+pre-specified mapping follows further down.
+
+```{r}
+share  <- B / rowSums(B)                       # fraction of each gene's mass in each topic
+within <- sweep(B, 2, colSums(B), "/")         # P(gene | topic)
+markers <- list(
+    "tumor epithelium"   = c("ERBB2", "KRT7", "EPCAM", "FOXA1", "GATA3", "KRT8"),
+    "fibroblast/stroma"  = c("LUM", "POSTN", "PDGFRB", "PDGFRA", "MMP2", "CCDC80"),
+    "T cell"             = c("CD3E", "TRAC", "IL7R", "CD8A", "CD3D", "CD2"),
+    "macrophage/myeloid" = c("LYZ", "CD163", "CD68", "AIF1", "MRC1", "FCER1G"),
+    "endothelial"        = c("VWF", "PECAM1", "AQP1", "CD93", "CLEC14A"),
+    "myoepithelial/SMC"  = c("MYH11", "ACTA2", "KRT5", "KRT14", "MYLK"),
+    "plasma/B cell"      = c("MZB1", "CD79A", "SLAMF7"))
+markers <- lapply(markers, function(g) g[g %in% rownames(B)])
+score <- sapply(markers, function(g) colMeans(share[g, , drop = FALSE]))   # topics x compartments
+
+labels <- vapply(seq_len(K), function(i) {
+    b <- which.max(score[i, ])
+    if (score[i, b] > 0.3) colnames(score)[b] else "mixed"
+}, "")
+
+top_genes <- function(k, n = 6) names(sort(within[, k] * share[, k], decreasing = TRUE))[seq_len(n)]
+data.frame(topic = tcols,
+           `share of transcripts` = sprintf("%.1f%%", 100 * colSums(B) / sum(B)),
+           `marker-based label` = labels,
+           `top genes` = vapply(tcols, function(k) paste(top_genes(k), collapse = ", "), ""),
+           check.names = FALSE, row.names = NULL)
+```
+
+```{r}
+#| fig-width: 11
+#| fig-height: 5
+genes_order <- unique(unlist(lapply(tcols, top_genes)))
+m <- t(share[genes_order, ])
+rownames(m) <- sprintf("%s: %s", tcols, labels)
+heat(m, main = "Top genes per topic (fraction of the gene's transcripts in the topic)",
+     zlim = c(0, 1), cex_col = 0.55)
+```
+
+## 7. Factors in space
+
+Each hexagon coloured by its most probable topic:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6.6
+P <- as.matrix(res[, tcols])
+top <- max.col(P, ties.method = "first")            # index into topics
+pal_t <- hcl.colors(K, "Dark 3")
+op <- par(mar = c(4, 4, 2, 13), xpd = NA)
+spatial_plot(res$x, res$y, pal_t[top], cex = 0.14, main = "Most probable topic per hexagon")
+legend("topright", inset = c(-0.3, 0), pch = 15, col = pal_t, bty = "n", cex = 0.75,
+       legend = sprintf("%s: %s", tcols, labels))
+par(op)
+```
+
+The tissue separates into tumour epithelium, stromal and immune compartments. To
+see each factor on its own, here is the per-hexagon probability of every topic:
+
+```{r}
+#| fig-width: 13
+#| fig-height: 8.4
+op <- par(mfrow = c(3, 4), mar = c(1, 1, 2, 1))
+pal <- hcl.colors(100, "viridis")
+for (i in seq_len(K)) {
+    o <- order(P[, i])                                # draw high probabilities last
+    spatial_plot(res$x[o], res$y[o], scale_col(P[o, i], pal, 0, 1), cex = 0.08,
+                 main = sprintf("%s: %s", tcols[i], labels[i]), axes = FALSE, xlab = "", ylab = "")
+}
+par(op)
+```
+
+### Spatial coherence check
+
+If the factors reflect real tissue structure, neighbouring hexagons should share a
+top topic far more often than chance (single 12 um hexagons are noisy, so well
+below 100%). The hexagon centres form a regular lattice, so the six neighbours of
+each hexagon are found from the lattice offsets, taken here from the hexagon
+nearest the centre of the section. As a reference we repeat the statistic after
+randomly permuting the topic labels.
+
+```{r}
+d <- 12
+c0 <- which.min((res$x - median(res$x))^2 + (res$y - median(res$y))^2)
+dist0 <- sqrt((res$x - res$x[c0])^2 + (res$y - res$y[c0])^2)
+nb0 <- which(dist0 > 0 & dist0 < 1.2 * d)
+offsets <- cbind(dx = res$x[nb0] - res$x[c0], dy = res$y[nb0] - res$y[c0])
+stopifnot(nrow(offsets) == 6)
+
+agreement <- function(lab) {
+    hits <- unlist(lapply(seq_len(6), function(j) {
+        nb <- match_xy(res$x + offsets[j, "dx"], res$y + offsets[j, "dy"],
+                       res$x, res$y, digits = 1)
+        (lab[nb] == lab)[!is.na(nb)]
+    }))
+    mean(hits)
+}
+agree <- agreement(top)
+set.seed(0)
+agree_perm <- agreement(sample(top))
+cat(sprintf("neighbours sharing the top topic: %.1f%%  (permuted labels: %.1f%%)\n",
+            100 * agree, 100 * agree_perm))
+stopifnot(agree > 0.4, agree > 2 * agree_perm)
+```
+
+## Reanalysis with an external marker mapping
+
+The marker sets used above were written after looking at the topics, so they are
+not an independent check. Here we repeat the annotation with a fixed, pre-specified
+mapping of 13 breast tissue compartments, defined before looking at this
+dataset's topics. Not every gene is on the Xenium panel, so we first report
+coverage.
+
+```{r}
+ref_markers <- list(
+    "epithelium (luminal/tumor)" = c("EPCAM", "KRT8", "KRT18", "KRT19", "KRT7", "CDH1", "FOXA1"),
+    "fibroblast"     = c("DCN", "LUM", "COL1A1", "COL1A2", "FBLN1", "PDGFRA"),
+    "pericyte/vSMC"  = c("RGS5", "NOTCH3", "MYH11", "MCAM", "PDGFRB"),
+    "myoepithelial"  = c("KRT5", "KRT14", "KRT17", "TP63", "OXTR"),
+    "T cell"         = c("CD3E", "CD3D", "CD3G", "TRAC", "CD247"),
+    "NK"             = c("NKG7", "GNLY", "KLRD1"),
+    "macrophage"     = c("C1QA", "C1QB", "CD163", "CD68", "CSF1R", "MRC1"),
+    "dendritic"      = c("CLEC9A", "LAMP3", "CD1C"),
+    "mast"           = c("TPSAB1", "CPA3", "KIT"),
+    "B cell"         = c("MS4A1", "CD79A", "CD79B", "CD19"),
+    "plasma"         = c("MZB1", "JCHAIN", "XBP1", "IGKC"),
+    "endothelial"    = c("PECAM1", "VWF", "CDH5", "PLVAP", "CLEC14A", "KDR"),
+    "adipocyte"      = c("ADIPOQ", "PLIN1", "LEP"))
+panel <- feat$feature[!is_ctrl]
+ref_present <- lapply(ref_markers, function(g) g[g %in% panel])
+cat(sprintf("%d of %d genes are on the panel\n",
+            sum(lengths(ref_present)), sum(lengths(ref_markers))))
+data.frame(compartment = names(ref_markers),
+           `on panel` = sprintf("%d/%d", lengths(ref_present), lengths(ref_markers)),
+           missing = vapply(names(ref_markers), function(c) {
+               m <- setdiff(ref_markers[[c]], panel)
+               if (length(m)) paste(m, collapse = ", ") else "-"
+           }, ""), check.names = FALSE, row.names = NULL)
+```
+
+### Topic-level scores
+
+For each topic and compartment we average, over the compartment's on-panel genes,
+the log2 enrichment of the gene in the topic: the fraction of the gene's
+transcripts assigned to the topic divided by the topic's overall share. A value of
+1 means the marker is twice as concentrated in that topic as expected by chance.
+A topic is assigned to a compartment when its best score exceeds 1.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+topic_frac <- colSums(B) / sum(B)
+enr <- log2(sweep(share + 1e-3, 2, topic_frac, "/"))
+ref_score <- sapply(ref_present, function(g) colMeans(enr[g, , drop = FALSE]))  # topics x compartments
+
+ref_labels <- vapply(seq_len(K), function(k) {
+    b <- which.max(ref_score[k, ])
+    if (ref_score[k, b] > 1) colnames(ref_score)[b] else "unassigned"
+}, "")
+
+m <- ref_score
+rownames(m) <- sprintf("%s: %s", tcols, ref_labels)
+heat(m, main = "Topic x compartment marker enrichment (pre-specified mapping)",
+     zlim = c(-3, 3), pal = rev(hcl.colors(50, "RdBu")))
+
+data.frame(topic = tcols, `hand-picked label` = labels,
+           `pre-specified label` = ref_labels,
+           `best score` = round(apply(ref_score, 1, max), 2),
+           check.names = FALSE, row.names = NULL)
+```
+
+### Hexagon-level check that does not use the topic model
+
+To check the assignment against the raw counts rather than the fitted topics, we
+weight each gene by its inverse total count so abundant genes do not dominate, and
+give each hexagon the compartment with the highest mean marker signal. This is
+compared with the compartment assigned to the hexagon's most probable topic.
+Hexagons in the results file are matched to the count matrix by their (x, y)
+centre, because punkst's random keys are not unique.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.6
+gene_tot <- Matrix::colSums(X)
+Xw <- X %*% Matrix::Diagonal(x = 1 / pmax(gene_tot, 1))
+colnames(Xw) <- colnames(X)
+comp_names <- names(ref_present)
+comp_sig <- sapply(comp_names, function(cn)
+    Matrix::rowMeans(Xw[, ref_present[[cn]], drop = FALSE]))
+comp_sig <- sweep(comp_sig, 2, colSums(comp_sig), "/")     # comparable across compartments
+direct <- comp_names[max.col(comp_sig, ties.method = "first")]
+direct[rowSums(comp_sig) == 0] <- "none"
+
+ridx <- match_xy(res$x, res$y, units$x, units$y)            # results row -> row of X
+stopifnot(!anyNA(ridx))
+
+topic_label <- ref_labels[top]
+direct_r <- direct[ridx]
+ok <- topic_label != "unassigned" & direct_r != "none"
+tl <- topic_label[ok]; dl <- direct_r[ok]
+agree_ref <- mean(tl == dl)
+set.seed(0)
+agree_shuf <- mean(sample(tl) == dl)
+cat(sprintf("%s hexagons compared; direct marker call matches topic-derived label for %.1f%% (shuffled: %.1f%%)\n",
+            format(sum(ok), big.mark = ","), 100 * agree_ref, 100 * agree_shuf))
+
+cm <- table(tl, dl)
+cm <- unclass(cm / rowSums(cm))
+heat(cm, main = "Row fraction: compartment from top topic (rows) vs raw marker counts (columns)",
+     zlim = c(0, 1))
+```
+
+### Map of the pre-specified annotation
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6.8
+uniq <- sort(unique(ref_labels))
+pal2 <- setNames(hcl.colors(length(uniq), "Dark 3"), uniq)
+pal2["unassigned"] <- "grey80"
+op <- par(mar = c(4, 4, 2, 13), xpd = NA)
+spatial_plot(res$x, res$y, pal2[topic_label], cex = 0.14,
+             main = "Hexagons coloured by the pre-specified compartment of their top topic")
+legend("topright", inset = c(-0.3, 0), pch = 15, col = pal2, bty = "n", cex = 0.75, legend = names(pal2))
+par(op)
+```
+
+**Reading the result.** In the run this vignette was written from, the
+pre-specified mapping agreed with the hand-picked labels for the compartments with
+several on-panel markers and a distinct signature (T cell, B cell, endothelial,
+myoepithelial, fibroblast). It did not reproduce the tumor labels: the main tumor
+topic scored just below the assignment threshold and other tumor-rich topics
+received low-support labels such as plasma, mast or adipocyte, each resting on one
+to three low-count genes (plasma has only MZB1 on the panel). The hexagon-level
+agreement with raw marker counts was well above a shuffled baseline but modest in
+absolute terms. In a tumor-dominated section, with 41 of 60 markers on a 313-gene
+panel, this mapping is better suited to the immune, vascular and stromal
+compartments than to separating tumor from normal epithelium, and its labels for
+small, weakly supported compartments should not be over-interpreted. A
+reference-based method with cell-level reference profiles would be the stronger
+test. Check the numbers above against these statements when you re-run.
+
+## Tumor markers in space
+
+The panel includes the HER2 gene `ERBB2`, the hormone receptors `ESR1` and `PGR`,
+the luminal-lineage genes `FOXA1` and `GATA3`, the proliferation marker `MKI67`,
+and the basal keratin `KRT5`. `GRB7` (usually co-amplified with `ERBB2`) is not on
+the panel, so HER2-axis evidence rests on `ERBB2` alone. Expression here is
+transcripts per 1,000 transcripts in each 12 um hexagon.
+
+```{r}
+tumor_genes <- c("ERBB2", "ESR1", "PGR", "FOXA1", "GATA3", "MKI67", "KRT5")
+cat("not on panel:", setdiff("GRB7", dictionary), "\n")
+tot <- units$total
+rate <- sapply(tumor_genes, function(g) as.numeric(X[, g]) / pmax(tot, 1) * 1000)
+round(data.frame(
+    transcripts = Matrix::colSums(X[, tumor_genes]),
+    `% hexagons with >=1` = 100 * colMeans(rate > 0),
+    `99th pct rate / 1000` = apply(rate, 2, quantile, probs = 0.99),
+    check.names = FALSE), 2)
+```
+
+```{r}
+#| fig-width: 16
+#| fig-height: 8
+op <- par(mfrow = c(2, 4), mar = c(1, 1, 2, 1), bg = "white")
+pal <- hcl.colors(100, "inferno")
+for (g in tumor_genes) {
+    v <- rate[, g]
+    o <- order(v)                                     # draw high-expressing hexagons last
+    vmax <- if (any(v > 0)) max(quantile(v[v > 0], 0.99), 1e-9) else 1
+    spatial_plot(units$x[o], units$y[o], scale_col(v[o], pal, 0, vmax), cex = 0.16,
+                 main = sprintf("%s (colour scale 0 to %.1f)", g, vmax),
+                 axes = FALSE, xlab = "", ylab = "")
+}
+par(op)
+```
+
+Do the tumor genes sit where the epithelial topics are? Mean rate by the
+pre-specified compartment of each hexagon's top topic:
+
+```{r}
+by <- as.data.frame(rate[ridx, ])
+by$compartment <- topic_label
+agg <- aggregate(. ~ compartment, data = by, FUN = mean)
+agg[tumor_genes] <- round(agg[tumor_genes], 2)
+agg$hexagons <- as.integer(table(by$compartment)[agg$compartment])
+agg
+```
+
+Receptor status is a clinical determination from IHC or ISH on pathology and
+cannot be called from this panel. Low `ESR1`/`PGR` counts in particular are not
+evidence of receptor negativity, because these genes are often weakly detected by
+Xenium. These maps show where the transcripts are, not a clinical subtype.
+
+## Summary
+
+```{r}
+data.frame(
+    stage = c("SpatialData read", "export (intrinsic um, qv >= 20)", "pts2tiles",
+              "tiles2hex", "topic-model", "spatial coherence"),
+    result = c(sprintf("%s transcripts, zarr store", format(tx$rows, big.mark = ",")),
+               sprintf("%s transcripts written", format(n_kept, big.mark = ",")),
+               sprintf("%d features, %d genes", nrow(feat), sum(!is_ctrl)),
+               sprintf("%s hexagons at 12 um", format(nrow(units), big.mark = ",")),
+               sprintf("%d topics; labels from marker genes", K),
+               sprintf("%.0f%% of neighbours share a top topic (permuted: %.0f%%)",
+                       100 * agree, 100 * agree_perm)))
+```

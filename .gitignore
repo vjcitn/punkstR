@@ -4,3 +4,6 @@
 *.tar.gz
 __pycache__/
 *.zarr/
+vignettes/*.html
+vignettes/*_files/
+.quarto/
