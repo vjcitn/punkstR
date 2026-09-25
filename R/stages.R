@@ -2,11 +2,20 @@
 # parameters and input identity in <workdir>/punkstR_manifest.rds and is
 # skipped on re-run when its outputs exist and nothing has changed.
 
+#' Default number of threads
+#'
+#' @return The number of detected cores, capped at 8, at least 1.
+#' @noRd
 default_threads <- function() {
     n <- suppressWarnings(parallel::detectCores())
     if (is.na(n)) 1L else max(1L, min(8L, n))
 }
 
+#' Identify input files for the manifest
+#'
+#' @param paths Character vector of file paths.
+#' @return A data frame with `path`, `size` and `mtime` per file.
+#' @noRd
 file_identity <- function(paths) {
     info <- file.info(paths)
     data.frame(path = normalizePath(paths, mustWork = FALSE),
@@ -14,14 +23,38 @@ file_identity <- function(paths) {
                stringsAsFactors = FALSE)
 }
 
+#' Path of the stage manifest
+#'
+#' @param workdir Working directory.
+#' @return `<workdir>/punkstR_manifest.rds`.
+#' @noRd
 manifest_path <- function(workdir) file.path(workdir, "punkstR_manifest.rds")
 
+#' Read the stage manifest
+#'
+#' @param workdir Working directory.
+#' @return The stored list of stage parameters, or an empty list.
+#' @noRd
 read_manifest <- function(workdir) {
     p <- manifest_path(workdir)
     if (file.exists(p)) readRDS(p) else list()
 }
 
-# Run `run()` unless the manifest shows the stage is up to date.
+#' Run a stage unless it is up to date
+#'
+#' A stage is up to date when all outputs exist and its parameters and input
+#' file identity match the manifest. Otherwise `run()` is called, the outputs
+#' are checked, and the manifest is updated.
+#'
+#' @param workdir Working directory holding the manifest.
+#' @param name Stage name (manifest key).
+#' @param params Named list of everything that can change the outcome.
+#' @param inputs Input file paths, recorded by size and modification time.
+#' @param outputs Output file paths that must exist afterwards.
+#' @param run Function with no arguments that does the work.
+#' @param overwrite Run even if up to date.
+#' @return Called for its side effects; the return value is not used.
+#' @noRd
 run_stage <- function(workdir, name, params, inputs, outputs, run, overwrite) {
     dir.create(workdir, showWarnings = FALSE, recursive = TRUE)
     params$.inputs <- file_identity(inputs)
@@ -46,6 +79,11 @@ run_stage <- function(workdir, name, params, inputs, outputs, run, overwrite) {
     }
 }
 
+#' Resolve the punkst binary or stop
+#'
+#' @param bin Explicit path, or `NULL`.
+#' @return The path to the binary.
+#' @noRd
 require_bin <- function(bin) {
     b <- resolve_bin(bin)
     if (is.na(b) || !file.exists(b))
@@ -53,11 +91,25 @@ require_bin <- function(bin) {
     b
 }
 
+#' Construct a stage object
+#'
+#' @param class Stage class, e.g. `"punkstTiles"`.
+#' @param workdir Working directory.
+#' @param files Named list of output files.
+#' @param params Parameters used.
+#' @return A list of class `c(class, "punkstStage")`.
+#' @noRd
 new_stage <- function(class, workdir, files, params)
     structure(list(workdir = workdir, files = files, params = params),
               class = c(class, "punkstStage"))
 
+#' Print a stage object
+#'
+#' @param x A `punkstStage` object.
+#' @param ... Unused.
+#' @return `x`, invisibly.
 #' @export
+#' @noRd
 print.punkstStage <- function(x, ...) {
     cat("<", class(x)[1], "> in ", x$workdir, "\n", sep = "")
     for (n in names(x$files)) cat(sprintf("  %-9s %s\n", n, x$files[[n]]))
@@ -303,9 +355,18 @@ punkst_tiles2hex <- function(tiles, hex_grid_dist = NULL, hex_size = NULL,
               params)
 }
 
-# Append "--flag value" (or a bare "--flag" for TRUE) to `args` when `value`
-# is set and differs from punkst's own default; otherwise leave punkst to use
-# its default.
+#' Append a command-line option when it differs from punkst's default
+#'
+#' Adds `--flag value` (or a bare `--flag` for `TRUE`) to `args` when `value`
+#' is set and differs from `default`; otherwise leaves punkst to use its own
+#' default. A vector value is appended after the flag as separate elements.
+#'
+#' @param args Character vector of arguments so far.
+#' @param flag Option name including the leading dashes.
+#' @param value Value, or `NULL` to omit.
+#' @param default punkst's own default, or `NULL` if there is none.
+#' @return `args`, possibly extended.
+#' @noRd
 opt_arg <- function(args, flag, value, default = NULL) {
     if (is.null(value) || (!is.null(default) && identical(value, default)))
         return(args)
@@ -582,7 +643,13 @@ run_punkst_pipeline <- function(sdata, workdir, export = list(),
               class = "punkstRun")
 }
 
+#' Print a pipeline run
+#'
+#' @param x A `punkstRun` object from [run_punkst_pipeline()].
+#' @param ... Unused.
+#' @return `x`, invisibly.
 #' @export
+#' @noRd
 print.punkstRun <- function(x, ...) {
     cat("<punkstRun>\n")
     cat("  transcripts:", x$transcripts, "\n")

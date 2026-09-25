@@ -2,6 +2,11 @@
 
 .install_doc <- "https://github.com/vjcitn/punkst/blob/spatialdata-bridge/docs/install.md"
 
+#' First usable value
+#'
+#' @param ... Candidate values, in priority order.
+#' @return The first length-one, non-missing, non-empty string, or `NULL`.
+#' @noRd
 .first_nonempty <- function(...) {
     for (x in list(...)) {
         if (!is.null(x) && length(x) == 1L && !is.na(x) && nzchar(x)) return(x)
@@ -29,6 +34,13 @@ punkst_setup <- function(bin = NULL, python = NULL) {
     invisible(list(bin = resolve_bin(), python = resolve_python()))
 }
 
+#' Locate the punkst binary
+#'
+#' Order: `bin`, `options(punkstR.bin)`, env var `PUNKST`, then the `PATH`.
+#'
+#' @param bin Explicit path, or `NULL`.
+#' @return A path, or `NA_character_` if none was found.
+#' @noRd
 resolve_bin <- function(bin = NULL) {
     b <- .first_nonempty(
         bin, getOption("punkstR.bin"), Sys.getenv("PUNKST", ""),
@@ -36,6 +48,14 @@ resolve_bin <- function(bin = NULL) {
     if (is.null(b)) NA_character_ else path.expand(b)
 }
 
+#' Locate the Python interpreter
+#'
+#' Order: `python`, `options(punkstR.python)`, env var `PUNKST_PYTHON`, then
+#' `python3` on the `PATH`.
+#'
+#' @param python Explicit path, or `NULL`.
+#' @return A path, or `NA_character_` if none was found.
+#' @noRd
 resolve_python <- function(python = NULL) {
     p <- .first_nonempty(
         python, getOption("punkstR.python"), Sys.getenv("PUNKST_PYTHON", ""),
@@ -43,9 +63,18 @@ resolve_python <- function(python = NULL) {
     if (is.null(p)) NA_character_ else path.expand(p)
 }
 
-# Run an executable through system2(), sending stdout and stderr to `log`.
-# Arguments are passed as a vector, so paths with spaces need no quoting by
-# the caller. Stops with the tail of the log on a non-zero exit status.
+#' Run an executable through `system2()`
+#'
+#' Sends stdout and stderr to `log`. Arguments are passed as a vector and
+#' quoted here, so paths with spaces need no quoting by the caller. Stops with
+#' the tail of the log on a non-zero exit status.
+#'
+#' @param command Executable to run.
+#' @param args Character vector of arguments.
+#' @param log Log file path; its directory is created.
+#' @param what Name used in error messages.
+#' @return `log`, invisibly.
+#' @noRd
 run_tool <- function(command, args, log, what = basename(command)) {
     dir.create(dirname(log), showWarnings = FALSE, recursive = TRUE)
     status <- suppressWarnings(
@@ -130,7 +159,13 @@ check_punkst_setup <- function(bin = NULL, python = NULL, quiet = FALSE) {
     invisible(res)
 }
 
+#' Print a setup check
+#'
+#' @param x A `punkstCheck` object from [check_punkst_setup()].
+#' @param ... Unused.
+#' @return `x`, invisibly.
 #' @export
+#' @noRd
 print.punkstCheck <- function(x, ...) {
     mark <- function(ok) if (ok) "OK     " else "MISSING"
     cat("punkst binary :", mark(x$bin_ok), format(x$bin), "\n")

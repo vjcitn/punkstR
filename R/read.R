@@ -31,6 +31,13 @@ sdata_info <- function(sdata, points_key = "transcripts", python = NULL,
     jsonlite::read_json(out, simplifyVector = FALSE)
 }
 
+#' Resolve a file from a stage object or a path
+#'
+#' @param x A stage object with a `files` list, or a single path.
+#' @param what Class name used in the error message.
+#' @param name Element of `x$files` to return.
+#' @return A file path.
+#' @noRd
 stage_file <- function(x, what, name) {
     if (is.character(x) && length(x) == 1L) return(x)
     f <- x$files[[name]]
