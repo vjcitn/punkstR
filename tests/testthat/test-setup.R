@@ -1,9 +1,9 @@
 test_that("check_punkst_setup reports a missing binary with the doc pointer", {
     res <- check_punkst_setup(bin = tempfile("nope"), python = tempfile("nopy"), quiet = TRUE)
-    expect_s3_class(res, "punkstCheck")
-    expect_false(res$bin_ok)
-    expect_false(res$python_ok)
-    expect_true(any(grepl("install.md", res$notes)))
+    expect_true(S7::S7_inherits(res, punkstConfig))
+    expect_false(res@bin_ok)
+    expect_false(res@python_ok)
+    expect_true(any(grepl("install.md", res@notes)))
 })
 
 test_that("punkst_setup stores options and resolution prefers explicit args", {

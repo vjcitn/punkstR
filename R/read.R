@@ -35,12 +35,12 @@ sdata_info <- function(sdata, points_key = "transcripts", python = NULL,
 #'
 #' @param x A stage object with a `files` list, or a single path.
 #' @param what Class name used in the error message.
-#' @param name Element of `x$files` to return.
+#' @param name Element of `x@files` to return.
 #' @return A file path.
 #' @noRd
 stage_file <- function(x, what, name) {
     if (is.character(x) && length(x) == 1L) return(x)
-    f <- x$files[[name]]
+    f <- x@files[[name]]
     if (is.null(f))
         stop("This object has no '", name, "' file; expected a ", what,
              " or a path.", call. = FALSE)
@@ -92,7 +92,7 @@ punkst_read_topics <- function(model) {
 #' @export
 punkst_read_hex <- function(hex) {
     f <- stage_file(hex, "punkstHex", "data")
-    meta <- if (is.character(hex)) sub("\\.txt$", ".json", hex) else hex$files$meta
+    meta <- if (is.character(hex)) sub("\\.txt$", ".json", hex) else hex@files$meta
     dict <- jsonlite::read_json(meta, simplifyVector = FALSE)$dictionary
     genes <- character(length(dict))
     genes[unlist(dict) + 1L] <- names(dict)

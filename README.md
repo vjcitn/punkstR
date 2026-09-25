@@ -51,7 +51,7 @@ run <- run_punkst_pipeline(
     tiles2hex = list(hex_grid_dist = 12),
     topic_model = list(n_topics = 12, n_epochs = 2, sort_topics = TRUE,
                        exclude_feature_regex = xenium_control_regex()))
-run$model$files$results   # per-hexagon topic probabilities
+run@model@files$results   # per-hexagon topic probabilities
 ```
 
 Each stage function exposes the options of the matching punkst command with punkst's own defaults (see `?punkst_pts2tiles`, `?punkst_tiles2hex`, `?punkst_topic_model`), and `run_punkst_pipeline()` takes each stage's options as a list.

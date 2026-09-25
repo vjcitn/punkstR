@@ -1,6 +1,6 @@
 python_with_sdata <- function() {
     chk <- check_punkst_setup(quiet = TRUE)
-    if (!chk$python_ok) NULL else chk$python
+    if (!chk@python_ok) NULL else chk@python
 }
 
 test_that("sdata_export rejects a missing store", {

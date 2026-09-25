@@ -10,12 +10,12 @@ punkst_tiles2hex(
   hex_size = NULL,
   bcc_grid_dist = NULL,
   bcc_size = NULL,
-  icol_x = tiles$params$icol_x,
-  icol_y = tiles$params$icol_y,
-  icol_feature = tiles$params$icol_feature,
+  icol_x = tiles@params$icol_x,
+  icol_y = tiles@params$icol_y,
+  icol_feature = tiles@params$icol_feature,
   icol_z = NULL,
   icol_int = NULL,
-  feature_dict = tiles$files$features,
+  feature_dict = tiles@files$features,
   min_count = NULL,
   bounding_boxes = NULL,
   anchor_files = NULL,
@@ -103,7 +103,7 @@ A \code{punkstHex} stage object; \code{files$data}, \code{files$meta} and
 Aggregates tiled points into hexagonal units (or 3D BCC units) and writes a
 sparse count file plus JSON metadata. Defaults are punkst's own and an
 option is passed only when it differs. Column indices default to those used
-when tiling (\code{tiles$params}).
+when tiling (\code{tiles@params}).
 }
 \details{
 Give exactly the grid you need: \code{hex_grid_dist} or \code{hex_size} for 2D, or

@@ -12,7 +12,7 @@ check_punkst_setup(bin = NULL, python = NULL, quiet = FALSE)
 \item{quiet}{If \code{FALSE}, print a summary.}
 }
 \value{
-An object of class \code{punkstCheck}: a list with \code{bin}, \code{python},
+A \link{punkstConfig} object with properties \code{bin}, \code{python},
 \code{bin_ok}, \code{python_ok}, \code{spatialdata_version}, \code{zarr_version}, \code{notes}.
 }
 \description{

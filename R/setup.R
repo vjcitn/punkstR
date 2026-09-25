@@ -42,6 +42,7 @@ punkst_setup <- function(bin = NULL, python = NULL) {
 #' @return A path, or `NA_character_` if none was found.
 #' @noRd
 resolve_bin <- function(bin = NULL) {
+    if (S7_inherits(bin, punkstConfig)) bin <- bin@bin
     b <- .first_nonempty(
         bin, getOption("punkstR.bin"), Sys.getenv("PUNKST", ""),
         unname(Sys.which("punkst")))
@@ -57,6 +58,7 @@ resolve_bin <- function(bin = NULL) {
 #' @return A path, or `NA_character_` if none was found.
 #' @noRd
 resolve_python <- function(python = NULL) {
+    if (S7_inherits(python, punkstConfig)) python <- python@python
     p <- .first_nonempty(
         python, getOption("punkstR.python"), Sys.getenv("PUNKST_PYTHON", ""),
         unname(Sys.which("python3")))
@@ -99,7 +101,7 @@ run_tool <- function(command, args, log, what = basename(command)) {
 #'
 #' @param bin,python Optional overrides; see [punkst_setup()].
 #' @param quiet If `FALSE`, print a summary.
-#' @return An object of class `punkstCheck`: a list with `bin`, `python`,
+#' @return A [punkstConfig] object with properties `bin`, `python`,
 #'   `bin_ok`, `python_ok`, `spatialdata_version`, `zarr_version`, `notes`.
 #' @export
 check_punkst_setup <- function(bin = NULL, python = NULL, quiet = FALSE) {
@@ -150,28 +152,10 @@ check_punkst_setup <- function(bin = NULL, python = NULL, quiet = FALSE) {
         }
     }
 
-    res <- structure(list(bin = bin, python = python, bin_ok = bin_ok,
-                          python_ok = python_ok,
-                          spatialdata_version = sd_version,
-                          zarr_version = zarr_version, notes = notes),
-                     class = "punkstCheck")
+    res <- punkstConfig(bin = bin, python = python, bin_ok = bin_ok,
+                        python_ok = python_ok, spatialdata_version = sd_version,
+                        zarr_version = zarr_version, notes = notes)
     if (!quiet) print(res)
     invisible(res)
 }
 
-#' Print a setup check
-#'
-#' @param x A `punkstCheck` object from [check_punkst_setup()].
-#' @param ... Unused.
-#' @return `x`, invisibly.
-#' @export
-#' @noRd
-print.punkstCheck <- function(x, ...) {
-    mark <- function(ok) if (ok) "OK     " else "MISSING"
-    cat("punkst binary :", mark(x$bin_ok), format(x$bin), "\n")
-    cat("python/sdata  :", mark(x$python_ok), format(x$python),
-        if (x$python_ok) sprintf("(spatialdata %s, zarr %s)",
-                                 x$spatialdata_version, x$zarr_version), "\n")
-    for (n in x$notes) cat("* ", n, "\n", sep = "")
-    invisible(x)
-}

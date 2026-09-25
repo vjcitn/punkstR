@@ -1,9 +1,9 @@
 test_that("write-back stores several runs side by side and they can be compared", {
     chk <- check_punkst_setup(quiet = TRUE)
-    skip_if_not(chk$bin_ok && chk$python_ok, "punkst binary or python/spatialdata missing")
+    skip_if_not(chk@bin_ok && chk@python_ok, "punkst binary or python/spatialdata missing")
     fixture <- system.file("python", "make_synthetic_sdata.py", package = "punkstR")
     zarr <- tempfile(fileext = ".zarr")
-    st <- system2(chk$python, c("-c", shQuote(sprintf(
+    st <- system2(chk@python, c("-c", shQuote(sprintf(
         "import sys; sys.path.insert(0, %s); import make_synthetic_sdata as m; m.build_structured(%s)",
         shQuote(dirname(fixture), type = "cmd"), shQuote(zarr, type = "cmd")))),
         stdout = FALSE, stderr = FALSE)
@@ -15,7 +15,7 @@ test_that("write-back stores several runs side by side and they can be compared"
         pts2tiles = list(tile_size = 100), tiles2hex = list(min_count = 5),
         topic_model = list(n_topics = k, n_epochs = 5, min_count_train = 5)))
     r2 <- go(2); r3 <- go(3)
-    expect_equal(r2$source$sdata, zarr)
+    expect_equal(r2@source$sdata, zarr)
 
     side <- tempfile(fileext = ".zarr")
     o1 <- sdata_writeback(r2, out = side)

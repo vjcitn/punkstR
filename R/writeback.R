@@ -48,21 +48,21 @@ sdata_writeback <- function(run, hex = NULL, sdata = NULL, out = NULL,
                             in_place = FALSE, name = NULL, points_key = NULL,
                             coordinate_system = "intrinsic", overwrite = FALSE,
                             python = NULL, log = tempfile("writeback", fileext = ".log")) {
-    if (inherits(run, "punkstRun")) {
-        model <- run$model
-        if (is.null(hex)) hex <- run$hex
-        if (is.null(sdata)) sdata <- run$source$sdata
-        if (is.null(points_key)) points_key <- run$source$points_key
-        if (missing(coordinate_system)) coordinate_system <- run$source["coordinate_system"][[1]]
+    if (S7_inherits(run, punkstRun)) {
+        model <- run@model
+        if (is.null(hex)) hex <- run@hex
+        if (is.null(sdata)) sdata <- run@source$sdata
+        if (is.null(points_key)) points_key <- run@source$points_key
+        if (missing(coordinate_system)) coordinate_system <- run@source["coordinate_system"][[1]]
     } else model <- run
-    if (!inherits(model, "punkstModel") || !inherits(hex, "punkstHex"))
+    if (!S7_inherits(model, punkstModel) || !S7_inherits(hex, punkstHex))
         stop("Give a punkstRun, or a punkstModel together with its punkstHex.", call. = FALSE)
-    if (is.null(model$files$results))
+    if (is.null(model@files$results))
         stop("The model has no results file; refit with transform = TRUE.", call. = FALSE)
     if (is.null(sdata) || !dir.exists(sdata))
         stop("Original SpatialData store not found; pass `sdata`.", call. = FALSE)
     if (is.null(points_key)) points_key <- "transcripts"
-    if (is.null(name)) name <- basename(sub("\\.model\\.tsv$", "", model$files$model))
+    if (is.null(name)) name <- basename(sub("\\.model\\.tsv$", "", model@files$model))
     name <- gsub("[^A-Za-z0-9_]", "_", name)
     target <- if (in_place) sdata else
         if (is.null(out)) paste0(sub("/+$", "", sub("\\.zarr/*$", "", sdata)), "_punkst.zarr") else out
@@ -75,12 +75,12 @@ sdata_writeback <- function(run, hex = NULL, sdata = NULL, out = NULL,
     pf <- tempfile(fileext = ".json"); of <- tempfile(fileext = ".json")
     on.exit(unlink(c(pf, of)))
     drop_null <- function(p) p[!vapply(p, is.null, NA)]
-    jsonlite::write_json(list(tiles2hex = drop_null(hex$params),
-                              topic_model = drop_null(model$params)),
+    jsonlite::write_json(list(tiles2hex = drop_null(hex@params),
+                              topic_model = drop_null(model@params)),
                          pf, auto_unbox = TRUE, null = "null", digits = NA)
     args <- c(script, "write", "--target", target, "--source", sdata, "--run", name,
-              "--hex", hex$files$data, "--hex-json", hex$files$meta,
-              "--results", model$files$results, "--model", model$files$model,
+              "--hex", hex@files$data, "--hex-json", hex@files$meta,
+              "--results", model@files$results, "--model", model@files$model,
               "--params", pf, "--points-key", points_key, "--out", of)
     if (!is.null(coordinate_system)) args <- c(args, "--coordinate-system", coordinate_system)
     if (overwrite) args <- c(args, "--overwrite")
@@ -139,8 +139,8 @@ sdata_runs <- function(sdata, python = NULL, log = tempfile("runs", fileext = ".
 #'   top topics are paired) and `n_shared_hexagons`.
 #' @export
 punkst_compare_runs <- function(a, b) {
-    ma <- if (inherits(a, "punkstRun")) a$model else a
-    mb <- if (inherits(b, "punkstRun")) b$model else b
+    ma <- if (S7_inherits(a, punkstRun)) a@model else a
+    mb <- if (S7_inherits(b, punkstRun)) b@model else b
     A <- punkst_read_model(ma); B <- punkst_read_model(mb)
     g <- intersect(rownames(A), rownames(B))
     if (!length(g)) stop("The two models share no genes.", call. = FALSE)

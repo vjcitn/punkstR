@@ -10,7 +10,7 @@ Description: Checks for the required executables and files, then runs the
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Imports: jsonlite, Matrix, utils
+Imports: jsonlite, Matrix, S7, utils
 Suggests: knitr, quarto, testthat (>= 3.0.0)
 VignetteBuilder: quarto
 Config/testthat/edition: 3

@@ -36,7 +36,7 @@ library(punkstR)
 
 zarr <- Sys.getenv("PUNKSTR_DEMO_ZARR")
 chk <- check_punkst_setup(quiet = TRUE)
-can_run <- nzchar(zarr) && dir.exists(zarr) && chk$bin_ok && chk$python_ok
+can_run <- nzchar(zarr) && dir.exists(zarr) && chk@bin_ok && chk@python_ok
 knitr::opts_chunk$set(eval = can_run, fig.width = 8, fig.height = 6, dpi = 110)
 if (!can_run) message("Demo not evaluated: set PUNKSTR_DEMO_ZARR and check_punkst_setup().")
 

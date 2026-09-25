@@ -28,7 +28,8 @@ test_that("readers parse punkst output files", {
     writeLines(c("G0\t10", "G1\t5"), file.path(d, "f.tsv"))
     f <- punkst_read_features(file.path(d, "f.tsv"))
     expect_equal(f$feature, c("G0", "G1"))
-    expect_error(punkst_read_model(structure(list(files = list()), class = "punkstModel")),
+    expect_error(punkst_read_model(punkstTiles(workdir = d, params = list(),
+        files = list(tsv = "a", index = "b", features = "c"))),
                  "no 'model' file")
 })
 

@@ -91,31 +91,6 @@ require_bin <- function(bin) {
     b
 }
 
-#' Construct a stage object
-#'
-#' @param class Stage class, e.g. `"punkstTiles"`.
-#' @param workdir Working directory.
-#' @param files Named list of output files.
-#' @param params Parameters used.
-#' @return A list of class `c(class, "punkstStage")`.
-#' @noRd
-new_stage <- function(class, workdir, files, params)
-    structure(list(workdir = workdir, files = files, params = params),
-              class = c(class, "punkstStage"))
-
-#' Print a stage object
-#'
-#' @param x A `punkstStage` object.
-#' @param ... Unused.
-#' @return `x`, invisibly.
-#' @export
-#' @noRd
-print.punkstStage <- function(x, ...) {
-    cat("<", class(x)[1], "> in ", x$workdir, "\n", sep = "")
-    for (n in names(x$files)) cat(sprintf("  %-9s %s\n", n, x$files[[n]]))
-    invisible(x)
-}
-
 #' Regular expression for Xenium control features
 #'
 #' Matches the control probes and codewords in Xenium transcript tables
@@ -226,7 +201,7 @@ punkst_pts2tiles <- function(tsv, workdir, tile_size,
     run_stage(workdir, "pts2tiles", params, tsv, unlist(files), overwrite = overwrite,
         run = function() run_tool(bin, a, file.path(workdir, "pts2tiles.log"),
                                   "punkst pts2tiles"))
-    new_stage("punkstTiles", workdir, files, params)
+    punkstTiles(workdir = workdir, files = files, params = params)
 }
 
 #' Pool transcripts into hexagons (`punkst tiles2hex`)
@@ -234,7 +209,7 @@ punkst_pts2tiles <- function(tsv, workdir, tile_size,
 #' Aggregates tiled points into hexagonal units (or 3D BCC units) and writes a
 #' sparse count file plus JSON metadata. Defaults are punkst's own and an
 #' option is passed only when it differs. Column indices default to those used
-#' when tiling (`tiles$params`).
+#' when tiling (`tiles@params`).
 #'
 #' Give exactly the grid you need: `hex_grid_dist` or `hex_size` for 2D, or
 #' `bcc_grid_dist` or `bcc_size` (with `icol_z`) for 3D. punkst has no default
@@ -280,16 +255,16 @@ punkst_pts2tiles <- function(tsv, workdir, tile_size,
 #' @export
 punkst_tiles2hex <- function(tiles, hex_grid_dist = NULL, hex_size = NULL,
         bcc_grid_dist = NULL, bcc_size = NULL,
-        icol_x = tiles$params$icol_x, icol_y = tiles$params$icol_y,
-        icol_feature = tiles$params$icol_feature, icol_z = NULL, icol_int = NULL,
-        feature_dict = tiles$files$features, min_count = NULL,
+        icol_x = tiles@params$icol_x, icol_y = tiles@params$icol_y,
+        icol_feature = tiles@params$icol_feature, icol_z = NULL, icol_int = NULL,
+        feature_dict = tiles@files$features, min_count = NULL,
         bounding_boxes = NULL, anchor_files = NULL, radius = NULL,
         ignore_background = FALSE, idf_q = 95, idf_power = 0.3, idf_min = 0.1,
         idf_max = 5, randomize = FALSE, seed = -1L, sort_mem = NULL,
         use_internal_sort = FALSE, out_prefix = NULL, temp_dir = NULL,
         threads = 1L, verbose = 1000000L, debug = 0L, bin = NULL,
         overwrite = FALSE) {
-    stopifnot(inherits(tiles, "punkstTiles"))
+    stopifnot(S7_inherits(tiles, punkstTiles))
     if (is.null(hex_grid_dist) && is.null(hex_size) &&
         is.null(bcc_grid_dist) && is.null(bcc_size))
         stop("Give one of hex_grid_dist, hex_size, bcc_grid_dist, bcc_size.",
@@ -297,7 +272,7 @@ punkst_tiles2hex <- function(tiles, hex_grid_dist = NULL, hex_size = NULL,
     if (!is.null(anchor_files) && is.null(radius))
         stop("anchor_files requires radius.", call. = FALSE)
     bin <- require_bin(bin)
-    workdir <- tiles$workdir
+    workdir <- tiles@workdir
     if (is.null(out_prefix)) {
         size <- if (!is.null(hex_grid_dist)) paste0("hex_", format(hex_grid_dist))
                 else if (!is.null(hex_size)) paste0("hexsize_", format(hex_size))
@@ -316,7 +291,7 @@ punkst_tiles2hex <- function(tiles, hex_grid_dist = NULL, hex_size = NULL,
         randomize = randomize, seed = seed, sort_mem = sort_mem,
         use_internal_sort = use_internal_sort)
     if (is.null(temp_dir)) temp_dir <- file.path(workdir, "tmp_tiles2hex")
-    a <- c("tiles2hex", "--in-tsv", tiles$files$tsv, "--in-index", tiles$files$index,
+    a <- c("tiles2hex", "--in-tsv", tiles@files$tsv, "--in-index", tiles@files$index,
            "--out", files$data, "--temp-dir", temp_dir)
     a <- opt_arg(a, "--icol-x", icol_x)
     a <- opt_arg(a, "--icol-y", icol_y)
@@ -346,13 +321,11 @@ punkst_tiles2hex <- function(tiles, hex_grid_dist = NULL, hex_size = NULL,
     a <- opt_arg(a, "--debug", debug, 0L)
     name <- paste0("tiles2hex_", basename(out_prefix))
     run_stage(workdir, name, params,
-        c(tiles$files$tsv, tiles$files$index, feature_dict, anchor_files),
+        c(tiles@files$tsv, tiles@files$index, feature_dict, anchor_files),
         unlist(files), overwrite = overwrite,
         run = function() run_tool(bin, a, file.path(workdir, paste0(name, ".log")),
                                   "punkst tiles2hex"))
-    new_stage("punkstHex", workdir,
-              c(files, if (!is.null(feature_dict)) list(features = feature_dict)),
-              params)
+    punkstHex(workdir = workdir, files = c(files, if (!is.null(feature_dict)) list(features = feature_dict)), params = params)
 }
 
 #' Append a command-line option when it differs from punkst's default
@@ -479,7 +452,7 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
         count_cache = "auto", count_cache_memory_budget = "1G",
         temp_dir = NULL, debug = 0L, verbose = 0L,
         bin = NULL, overwrite = FALSE) {
-    stopifnot(inherits(hex, "punkstHex"))
+    stopifnot(S7_inherits(hex, punkstHex))
     if (is.null(n_topics) && is.null(model_prior))
         stop("Give n_topics, or model_prior to start from an existing model.",
              call. = FALSE)
@@ -490,8 +463,8 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
     if (!is.null(background_prior) && !file.exists(background_prior))
         stop("background_prior not found: ", background_prior, call. = FALSE)
     bin <- require_bin(bin)
-    workdir <- hex$workdir
-    stem <- sub("\\.txt$", "", basename(hex$files$data))
+    workdir <- hex@workdir
+    stem <- sub("\\.txt$", "", basename(hex@files$data))
     tag <- if (!is.null(n_topics)) sprintf("k%d", as.integer(n_topics)) else "prior"
     if (is.null(out_prefix)) out_prefix <- file.path(workdir, paste0(stem, ".", tag))
 
@@ -531,8 +504,8 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
         count_cache = count_cache,
         count_cache_memory_budget = count_cache_memory_budget)
 
-    a <- c("topic-model", "--in-data", hex$files$data, "--in-meta", hex$files$meta,
-           "--features", hex$files$features, "--out-prefix", out_prefix)
+    a <- c("topic-model", "--in-data", hex@files$data, "--in-meta", hex@files$meta,
+           "--features", hex@files$features, "--out-prefix", out_prefix)
     a <- opt_arg(a, "--n-topics", n_topics)
     a <- opt_arg(a, "--n-epochs", n_epochs, 1L)
     a <- opt_arg(a, "--seed", seed, -1L)
@@ -583,11 +556,11 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
 
     name <- paste0("topic_model_", basename(out_prefix))
     run_stage(workdir, name, params,
-        c(hex$files$data, hex$files$meta, model_prior, background_prior),
+        c(hex@files$data, hex@files$meta, model_prior, background_prior),
         unlist(files), overwrite = overwrite,
         run = function() run_tool(bin, a, file.path(workdir, paste0(name, ".log")),
                                   "punkst topic-model"))
-    new_stage("punkstModel", workdir, files, params)
+    punkstModel(workdir = workdir, files = files, params = params)
 }
 
 #' Run the whole pipeline from a SpatialData store
@@ -620,7 +593,7 @@ run_punkst_pipeline <- function(sdata, workdir, export = list(),
         threads = default_threads(), bin = NULL, python = NULL,
         overwrite = FALSE) {
     chk <- check_punkst_setup(bin = bin, python = python, quiet = TRUE)
-    if (!chk$bin_ok || !chk$python_ok) {
+    if (!chk@bin_ok || !chk@python_ok) {
         print(chk)
         stop("Setup check failed; see above.", call. = FALSE)
     }
@@ -645,20 +618,7 @@ run_punkst_pipeline <- function(sdata, workdir, export = list(),
                    points_key = if (is.null(export$points_key)) "transcripts" else export$points_key,
                    coordinate_system = if ("coordinate_system" %in% names(export))
                        export$coordinate_system else "intrinsic")
-    structure(list(transcripts = tsv, tiles = tiles, hex = hex, model = model,
-                   source = source), class = "punkstRun")
+    punkstRun(transcripts = tsv, tiles = tiles, hex = hex, model = model,
+              source = source)
 }
 
-#' Print a pipeline run
-#'
-#' @param x A `punkstRun` object from [run_punkst_pipeline()].
-#' @param ... Unused.
-#' @return `x`, invisibly.
-#' @export
-#' @noRd
-print.punkstRun <- function(x, ...) {
-    cat("<punkstRun>\n")
-    cat("  transcripts:", x$transcripts, "\n")
-    for (s in c("tiles", "hex", "model")) print(x[[s]])
-    invisible(x)
-}
