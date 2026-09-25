@@ -5,9 +5,10 @@ pipeline from R. punkstR checks that the required executables and files exist,
 then runs them with `system2()`. It does **not** use reticulate or import any
 Python module into R.
 
-Status: early development. Implemented so far: setup checks and the SpatialData
-export. Planned: wrappers for `pts2tiles`, `tiles2hex` and `topic-model`, readers
-for the results, and an optional `SpatialExperiment` adapter.
+Status: early development. Implemented so far: setup checks, the SpatialData
+export, and wrappers for `pts2tiles`, `tiles2hex` and `topic-model` with a
+one-call pipeline. Planned: readers for the results and an optional
+`SpatialExperiment` adapter.
 
 ## What you need
 
@@ -40,6 +41,23 @@ The output is a tab-separated file with a `#` header, ready for
 `punkst pts2tiles`. For Xenium stores, `spatialdata-io` registers the transcripts
 in `global` (image pixels) through a scale transform while the stored coordinates
 are microns, which is what punkst expects, hence `"intrinsic"`.
+
+## Run the pipeline
+
+```r
+run <- run_punkst_pipeline(
+    "data.zarr", workdir = "xenium_run",
+    export = list(coordinate_system = "intrinsic", min_qv = 20),
+    hex_grid_dist = 12, n_topics = 12,
+    exclude_feature_regex = xenium_control_regex())
+run$model$files$results   # per-hexagon topic probabilities
+```
+
+or call the stages one at a time (`sdata_export()`, `punkst_pts2tiles()`,
+`punkst_tiles2hex()`, `punkst_topic_model()`), each taking the previous stage's
+result. Each stage writes a log in `workdir`, and a manifest records its
+parameters and inputs; re-running skips stages whose outputs exist and whose
+parameters and input files are unchanged (`overwrite = TRUE` forces a re-run).
 
 ## Building punkst
 
