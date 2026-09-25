@@ -121,15 +121,18 @@ devtools::test()
 Tests that need Python with spatialdata skip themselves when it is not
 available.
 
-## Vignette
+## Vignette and large demonstrations
 
-`vignette("xenium-breast", package = "punkstR")` walks through a Xenium breast
-cancer section using only punkstR functions and base R. It runs when
-`PUNKSTR_DEMO_ZARR` points at the demonstration SpatialData store and the
-`punkst` binary and Python are available (`PUNKST`, `PUNKST_PYTHON`);
-otherwise its code is shown but not evaluated. Set `PUNKSTR_DEMO_WORKDIR` to
-keep intermediate files (about 2 GB) between renders. Building vignettes needs
-the Quarto command line tool.
+`vignette("punkstR")` is a short, self-contained walkthrough on a synthetic
+store made with `sdata_demo()`; it runs when a `punkst` binary and a Python
+with `spatialdata` are available (`PUNKST`, `PUNKST_PYTHON`) and otherwise
+shows its code without running it. Building vignettes needs the Quarto command
+line tool.
+
+The real-data Xenium breast cancer walkthrough lives in
+`inst/largedemos/` (installed at `system.file("largedemos", package = "punkstR")`)
+and is not built with the package. It needs `PUNKSTR_DEMO_ZARR` and, optionally,
+`PUNKSTR_DEMO_WORKDIR`; see the README in that folder.
 
 Result readers: `punkst_read_model()`, `punkst_read_topics()`,
 `punkst_read_hex()` (sparse hexagon x gene counts), `punkst_read_features()`

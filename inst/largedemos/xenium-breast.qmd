@@ -1,9 +1,5 @@
 ---
 title: "Pixel-level factor analysis of a Xenium breast cancer section from R"
-vignette: >
-  %\VignetteIndexEntry{Xenium breast cancer walkthrough}
-  %\VignetteEngine{quarto::html}
-  %\VignetteEncoding{UTF-8}
 format:
   html:
     toc: true

@@ -7,3 +7,5 @@ __pycache__/
 vignettes/*.html
 vignettes/*_files/
 .quarto/
+inst/largedemos/*.html
+inst/largedemos/*_files/
