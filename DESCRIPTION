@@ -1,0 +1,15 @@
+Package: punkstR
+Title: Drive the 'punkst' Spatial Transcriptomics Pipeline from R
+Version: 0.0.0.9000
+Authors@R: person("Vincent", "Carey", email = "stvjc@channing.harvard.edu", role = c("aut", "cre"))
+Description: Checks for the required executables and files, then runs the
+    'punkst' command line tools and a small Python export script with
+    'system2()'. No Python modules are imported into R. Includes an export of
+    SpatialData (zarr) point elements to the transcript format 'punkst'
+    expects.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0
