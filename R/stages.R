@@ -75,66 +75,231 @@ xenium_control_regex <- function() "^(antisense_|NegControl|BLANK_|UnassignedCod
 
 #' Tile a transcript file (`punkst pts2tiles`)
 #'
-#' @param tsv Transcript file from [sdata_export()] (columns x, y, feature).
+#' Splits a delimited point file into spatial tiles and writes an index. Covers
+#' the standard mode of `punkst pts2tiles`; the `--tile-op-factor-tsv` mode
+#' (converting factor-probability output, with `--binary-out`, `--K`,
+#' `--pixel-res`, `--feature-dict`) is not wrapped. Defaults are punkst's own,
+#' and an option is passed only when it differs from its default, except that
+#' the column indices default to 0, 1 and 2 (x, y, feature), the layout
+#' written by [sdata_export()], where punkst has no default.
+#'
+#' @param tsv Input delimited file (`--in-tsv`), e.g. from [sdata_export()].
 #' @param workdir Directory for outputs, logs and the manifest.
-#' @param tile_size Tile size in the same units as the coordinates (microns).
-#' @param threads Number of threads.
+#' @param tile_size Tile size in the input's coordinate units (`--tile-size`).
+#'   Required.
+#' @param icol_x,icol_y,icol_feature 0-based columns of x, y and feature
+#'   (`--icol-x`, `--icol-y`, `--icol-feature`). `icol_feature = NULL` omits
+#'   the feature column and the feature dictionary output.
+#' @param icol_z Optional 0-based z column (`--icol-z`).
+#' @param icol_int Optional 0-based integer-value (count) columns
+#'   (`--icol-int`).
+#' @param csv Treat the input as CSV (`--csv`); punkst otherwise infers it from
+#'   the file extension.
+#' @param keep_quotes 0-based columns to keep quoted in CSV output
+#'   (`--keep-quotes`).
+#' @param skip Number of input lines to skip (`--skip`).
+#' @param skip_last_is_header Treat the last skipped line as the header
+#'   (`--skip-last-is-header`). Lines starting with `#` at the top are
+#'   detected automatically, so this is not needed for [sdata_export()]
+#'   output.
+#' @param scale Uniform coordinate scale factor (`--scale`).
+#' @param scale_x,scale_y,scale_z Per-axis scale factors that override `scale`
+#'   (`--scale-x`, `--scale-y`, `--scale-z`).
+#' @param digits Precision of rewritten coordinates when scaling is applied
+#'   (`--digits`).
+#' @param include_cols,exclude_cols 0-based columns to keep or drop in the
+#'   tiled output (`--include-cols`, `--exclude-cols`; mutually exclusive). The
+#'   column positions in the tiled file then differ from the input, so pass
+#'   matching `icol_*` to [punkst_tiles2hex()].
+#' @param tile_buffer Buffer lines per tile per thread (`--tile-buffer`).
+#' @param batch_size Batch size in lines for gzipped or streamed input
+#'   (`--batch-size`).
+#' @param temp_dir Directory for temporary files (`--temp-dir`); default is
+#'   `<workdir>/tmp_pts2tiles`.
+#' @param threads Number of threads (`--threads`).
+#' @param verbose,debug Verbosity and debug level (`--verbose`, `--debug`).
 #' @param bin Path to `punkst`; see [punkst_setup()].
 #' @param overwrite Re-run even if up to date.
-#' @return A `punkstTiles` stage object with the output `files`.
+#' @return A `punkstTiles` stage object with the output `files` (`tsv`,
+#'   `index`, `coord_range`, and `features` when a feature column is given).
 #' @export
-punkst_pts2tiles <- function(tsv, workdir, tile_size = 500,
-                             threads = default_threads(), bin = NULL,
-                             overwrite = FALSE) {
+punkst_pts2tiles <- function(tsv, workdir, tile_size,
+        icol_x = 0L, icol_y = 1L, icol_feature = 2L, icol_z = NULL,
+        icol_int = NULL, csv = FALSE, keep_quotes = NULL, skip = 0L,
+        skip_last_is_header = FALSE, scale = 1, scale_x = NULL, scale_y = NULL,
+        scale_z = NULL, digits = 2L, include_cols = NULL, exclude_cols = NULL,
+        tile_buffer = 1000L, batch_size = 10000L, temp_dir = NULL,
+        threads = 1L, verbose = 1000000L, debug = 0L, bin = NULL,
+        overwrite = FALSE) {
+    if (missing(tile_size)) stop("tile_size is required.", call. = FALSE)
     if (!file.exists(tsv)) stop("Input not found: ", tsv, call. = FALSE)
+    if (!is.null(include_cols) && !is.null(exclude_cols))
+        stop("include_cols and exclude_cols are mutually exclusive.", call. = FALSE)
     bin <- require_bin(bin)
     prefix <- file.path(workdir, "tiled")
     files <- list(tsv = paste0(prefix, ".tsv"), index = paste0(prefix, ".index"),
-                  features = paste0(prefix, ".features.tsv"),
                   coord_range = paste0(prefix, ".coord_range.tsv"))
-    params <- list(bin = bin, tile_size = tile_size)
+    if (!is.null(icol_feature)) files$features <- paste0(prefix, ".features.tsv")
+    params <- list(bin = bin, tile_size = tile_size, icol_x = icol_x,
+        icol_y = icol_y, icol_feature = icol_feature, icol_z = icol_z,
+        icol_int = icol_int, csv = csv, keep_quotes = keep_quotes, skip = skip,
+        skip_last_is_header = skip_last_is_header, scale = scale,
+        scale_x = scale_x, scale_y = scale_y, scale_z = scale_z, digits = digits,
+        include_cols = include_cols, exclude_cols = exclude_cols,
+        tile_buffer = tile_buffer, batch_size = batch_size)
+    if (is.null(temp_dir)) temp_dir <- file.path(workdir, "tmp_pts2tiles")
+    a <- c("pts2tiles", "--in-tsv", tsv, "--tile-size", tile_size,
+           "--out-prefix", prefix, "--temp-dir", temp_dir)
+    a <- opt_arg(a, "--icol-x", icol_x)
+    a <- opt_arg(a, "--icol-y", icol_y)
+    a <- opt_arg(a, "--icol-feature", icol_feature)
+    a <- opt_arg(a, "--icol-z", icol_z)
+    a <- opt_arg(a, "--icol-int", icol_int)
+    a <- opt_arg(a, "--csv", csv)
+    a <- opt_arg(a, "--keep-quotes", keep_quotes)
+    a <- opt_arg(a, "--skip", skip, 0L)
+    a <- opt_arg(a, "--skip-last-is-header", skip_last_is_header)
+    a <- opt_arg(a, "--scale", scale, 1)
+    a <- opt_arg(a, "--scale-x", scale_x)
+    a <- opt_arg(a, "--scale-y", scale_y)
+    a <- opt_arg(a, "--scale-z", scale_z)
+    a <- opt_arg(a, "--digits", digits, 2L)
+    a <- opt_arg(a, "--include-cols", include_cols)
+    a <- opt_arg(a, "--exclude-cols", exclude_cols)
+    a <- opt_arg(a, "--tile-buffer", tile_buffer, 1000L)
+    a <- opt_arg(a, "--batch-size", batch_size, 10000L)
+    a <- opt_arg(a, "--threads", threads, 1L)
+    a <- opt_arg(a, "--verbose", verbose, 1000000L)
+    a <- opt_arg(a, "--debug", debug, 0L)
     run_stage(workdir, "pts2tiles", params, tsv, unlist(files), overwrite = overwrite,
-        run = function() run_tool(bin, c(
-            "pts2tiles", "--in-tsv", tsv,
-            "--icol-x", 0, "--icol-y", 1, "--icol-feature", 2,
-            "--tile-size", tile_size, "--temp-dir", file.path(workdir, "tmp_pts2tiles"),
-            "--threads", threads, "--out-prefix", prefix),
-            file.path(workdir, "pts2tiles.log"), "punkst pts2tiles"))
+        run = function() run_tool(bin, a, file.path(workdir, "pts2tiles.log"),
+                                  "punkst pts2tiles"))
     new_stage("punkstTiles", workdir, files, params)
 }
 
 #' Pool transcripts into hexagons (`punkst tiles2hex`)
 #'
+#' Aggregates tiled points into hexagonal units (or 3D BCC units) and writes a
+#' sparse count file plus JSON metadata. Defaults are punkst's own and an
+#' option is passed only when it differs. Column indices default to those used
+#' when tiling (`tiles$params`).
+#'
+#' Give exactly the grid you need: `hex_grid_dist` or `hex_size` for 2D, or
+#' `bcc_grid_dist` or `bcc_size` (with `icol_z`) for 3D. punkst has no default
+#' size.
+#'
 #' @param tiles A `punkstTiles` object from [punkst_pts2tiles()].
-#' @param hex_grid_dist Centre-to-centre hexagon spacing (microns).
-#' @param min_count Minimum transcripts for a hexagon to be kept.
-#' @param seed Random seed for the hexagon order.
-#' @inheritParams punkst_pts2tiles
-#' @return A `punkstHex` stage object; `files$data` and `files$meta` feed
-#'   [punkst_topic_model()].
+#' @param hex_grid_dist,hex_size Hexagon centre-to-centre distance
+#'   (`--hex-grid-dist`) or side length (`--hex-size`).
+#' @param bcc_grid_dist,bcc_size BCC lattice spacing (`--bcc-grid-dist`) or
+#'   size (`--bcc-size`) for 3D aggregation.
+#' @param icol_x,icol_y,icol_feature 0-based columns in the tiled file
+#'   (`--icol-x`, `--icol-y`, `--icol-feature`); default to the values used in
+#'   [punkst_pts2tiles()].
+#' @param icol_z 0-based z column, which enables 3D aggregation (`--icol-z`).
+#' @param icol_int 0-based integer-value columns (`--icol-int`).
+#' @param feature_dict Feature name list for non-integer feature columns
+#'   (`--feature-dict`); defaults to the tiling stage's feature file.
+#' @param min_count Minimum count per integer column for a unit to be kept,
+#'   combined with OR (`--min-count`); punkst's default keeps units with at
+#'   least 1.
+#' @param bounding_boxes Rectangular regions `(xmin ymin xmax ymax)*` to
+#'   restrict to (`--bounding-boxes`).
+#' @param anchor_files,radius,ignore_background Aggregate around anchor points
+#'   instead of a grid (`--anchor-files`, `--radius`, `--ignore-background`).
+#' @param idf_q,idf_power,idf_min,idf_max Parameters of the capped IDF feature
+#'   weights (`--idf-q`, `--idf-power`, `--idf-min`, `--idf-max`).
+#' @param randomize Randomise the output order (`--randomize`). punkst does not
+#'   by default; online topic-model training generally benefits from it.
+#' @param seed Seed for the randomised output keys (`--seed`); `-1` draws a
+#'   random one.
+#' @param sort_mem Memory for sorting with K, M or G units (`--sort-mem`).
+#' @param use_internal_sort Use punkst's internal sort instead of the system
+#'   `sort` (`--use-internal-sort`).
+#' @param out_prefix Output stem; default `<workdir>/hex_<grid size>`.
+#' @param temp_dir Directory for temporary files; default
+#'   `<workdir>/tmp_tiles2hex`.
+#' @param threads Number of threads (`--threads`).
+#' @param verbose,debug Verbosity and debug level.
+#' @param bin Path to `punkst`; see [punkst_setup()].
+#' @param overwrite Re-run even if up to date.
+#' @return A `punkstHex` stage object; `files$data`, `files$meta` and
+#'   `files$features` feed [punkst_topic_model()].
 #' @export
-punkst_tiles2hex <- function(tiles, hex_grid_dist = 12, min_count = 20, seed = 1,
-                             threads = default_threads(), bin = NULL,
-                             overwrite = FALSE) {
+punkst_tiles2hex <- function(tiles, hex_grid_dist = NULL, hex_size = NULL,
+        bcc_grid_dist = NULL, bcc_size = NULL,
+        icol_x = tiles$params$icol_x, icol_y = tiles$params$icol_y,
+        icol_feature = tiles$params$icol_feature, icol_z = NULL, icol_int = NULL,
+        feature_dict = tiles$files$features, min_count = NULL,
+        bounding_boxes = NULL, anchor_files = NULL, radius = NULL,
+        ignore_background = FALSE, idf_q = 95, idf_power = 0.3, idf_min = 0.1,
+        idf_max = 5, randomize = FALSE, seed = -1L, sort_mem = NULL,
+        use_internal_sort = FALSE, out_prefix = NULL, temp_dir = NULL,
+        threads = 1L, verbose = 1000000L, debug = 0L, bin = NULL,
+        overwrite = FALSE) {
     stopifnot(inherits(tiles, "punkstTiles"))
+    if (is.null(hex_grid_dist) && is.null(hex_size) &&
+        is.null(bcc_grid_dist) && is.null(bcc_size))
+        stop("Give one of hex_grid_dist, hex_size, bcc_grid_dist, bcc_size.",
+             call. = FALSE)
+    if (!is.null(anchor_files) && is.null(radius))
+        stop("anchor_files requires radius.", call. = FALSE)
     bin <- require_bin(bin)
     workdir <- tiles$workdir
-    stem <- file.path(workdir, sprintf("hex_%s", format(hex_grid_dist)))
-    files <- list(data = paste0(stem, ".txt"), meta = paste0(stem, ".json"))
-    params <- list(bin = bin, hex_grid_dist = hex_grid_dist,
-                   min_count = min_count, seed = seed)
-    run_stage(workdir, "tiles2hex", params,
-        c(tiles$files$tsv, tiles$files$index, tiles$files$features),
+    if (is.null(out_prefix)) {
+        size <- if (!is.null(hex_grid_dist)) paste0("hex_", format(hex_grid_dist))
+                else if (!is.null(hex_size)) paste0("hexsize_", format(hex_size))
+                else if (!is.null(bcc_grid_dist)) paste0("bcc_", format(bcc_grid_dist))
+                else paste0("bccsize_", format(bcc_size))
+        out_prefix <- file.path(workdir, size)
+    }
+    files <- list(data = paste0(out_prefix, ".txt"), meta = paste0(out_prefix, ".json"))
+    params <- list(bin = bin, hex_grid_dist = hex_grid_dist, hex_size = hex_size,
+        bcc_grid_dist = bcc_grid_dist, bcc_size = bcc_size, icol_x = icol_x,
+        icol_y = icol_y, icol_feature = icol_feature, icol_z = icol_z,
+        icol_int = icol_int, feature_dict = feature_dict, min_count = min_count,
+        bounding_boxes = bounding_boxes, anchor_files = anchor_files,
+        radius = radius, ignore_background = ignore_background, idf_q = idf_q,
+        idf_power = idf_power, idf_min = idf_min, idf_max = idf_max,
+        randomize = randomize, seed = seed, sort_mem = sort_mem,
+        use_internal_sort = use_internal_sort)
+    if (is.null(temp_dir)) temp_dir <- file.path(workdir, "tmp_tiles2hex")
+    a <- c("tiles2hex", "--in-tsv", tiles$files$tsv, "--in-index", tiles$files$index,
+           "--out", files$data, "--temp-dir", temp_dir)
+    a <- opt_arg(a, "--icol-x", icol_x)
+    a <- opt_arg(a, "--icol-y", icol_y)
+    a <- opt_arg(a, "--icol-z", icol_z)
+    a <- opt_arg(a, "--icol-feature", icol_feature)
+    a <- opt_arg(a, "--feature-dict", feature_dict)
+    a <- opt_arg(a, "--icol-int", icol_int)
+    a <- opt_arg(a, "--hex-grid-dist", hex_grid_dist)
+    a <- opt_arg(a, "--hex-size", hex_size)
+    a <- opt_arg(a, "--bcc-grid-dist", bcc_grid_dist)
+    a <- opt_arg(a, "--bcc-size", bcc_size)
+    a <- opt_arg(a, "--min-count", min_count)
+    a <- opt_arg(a, "--bounding-boxes", bounding_boxes)
+    a <- opt_arg(a, "--anchor-files", anchor_files)
+    a <- opt_arg(a, "--radius", radius)
+    a <- opt_arg(a, "--ignore-background", ignore_background)
+    a <- opt_arg(a, "--idf-q", idf_q, 95)
+    a <- opt_arg(a, "--idf-power", idf_power, 0.3)
+    a <- opt_arg(a, "--idf-min", idf_min, 0.1)
+    a <- opt_arg(a, "--idf-max", idf_max, 5)
+    a <- opt_arg(a, "--randomize", randomize)
+    a <- opt_arg(a, "--seed", seed, -1L)
+    a <- opt_arg(a, "--sort-mem", sort_mem)
+    a <- opt_arg(a, "--use-internal-sort", use_internal_sort)
+    a <- opt_arg(a, "--threads", threads, 1L)
+    a <- opt_arg(a, "--verbose", verbose, 1000000L)
+    a <- opt_arg(a, "--debug", debug, 0L)
+    name <- paste0("tiles2hex_", basename(out_prefix))
+    run_stage(workdir, name, params,
+        c(tiles$files$tsv, tiles$files$index, feature_dict, anchor_files),
         unlist(files), overwrite = overwrite,
-        run = function() run_tool(bin, c(
-            "tiles2hex", "--in-tsv", tiles$files$tsv, "--in-index", tiles$files$index,
-            "--feature-dict", tiles$files$features,
-            "--icol-x", 0, "--icol-y", 1, "--icol-feature", 2,
-            "--hex-grid-dist", hex_grid_dist, "--min-count", min_count,
-            "--out", files$data, "--randomize", "--seed", seed,
-            "--temp-dir", file.path(workdir, "tmp_tiles2hex"), "--threads", threads),
-            file.path(workdir, "tiles2hex.log"), "punkst tiles2hex"))
-    new_stage("punkstHex", workdir, c(files, list(features = tiles$files$features)),
+        run = function() run_tool(bin, a, file.path(workdir, paste0(name, ".log")),
+                                  "punkst tiles2hex"))
+    new_stage("punkstHex", workdir,
+              c(files, if (!is.null(feature_dict)) list(features = feature_dict)),
               params)
 }
 
@@ -371,23 +536,29 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
 #' Chains [sdata_export()], [punkst_pts2tiles()], [punkst_tiles2hex()] and
 #' [punkst_topic_model()] in `workdir`. Finished stages are skipped on re-run.
 #'
+#' Each stage takes its options as a list, so every option of the stage
+#' functions is reachable. The pipeline sets these defaults, which override the
+#' stage functions' punkst defaults and are themselves overridden by your
+#' lists: `tile_size = 500`; `hex_grid_dist = 12`, `min_count = 20`,
+#' `randomize = TRUE`, `seed = 1`; `n_topics = 12`, `seed = 1`. `threads`
+#' applies to all three punkst stages.
+#'
 #' @param sdata Path to the SpatialData `.zarr` store.
 #' @param workdir Directory for all outputs.
-#' @param export A list of extra arguments for [sdata_export()].
-#' @param tile_size,hex_grid_dist,min_count,n_topics,seed,threads
-#'   See the individual stage functions.
-#' @param topic_model A list of further arguments for [punkst_topic_model()],
-#'   e.g. `list(n_epochs = 2, exclude_feature_regex = xenium_control_regex())`.
+#' @param export,pts2tiles,tiles2hex,topic_model Named lists of arguments for
+#'   [sdata_export()], [punkst_pts2tiles()], [punkst_tiles2hex()] and
+#'   [punkst_topic_model()], e.g.
+#'   `topic_model = list(n_topics = 8, exclude_feature_regex = xenium_control_regex())`.
+#' @param threads Threads for the punkst stages.
 #' @param bin,python See [punkst_setup()].
 #' @param overwrite Re-run all stages.
 #' @return A `punkstRun` object with elements `transcripts`, `tiles`, `hex`
 #'   and `model`.
 #' @export
 run_punkst_pipeline <- function(sdata, workdir, export = list(),
-                                tile_size = 500, hex_grid_dist = 12,
-                                min_count = 20, n_topics, topic_model = list(),
-                                seed = 1, threads = default_threads(),
-                                bin = NULL, python = NULL, overwrite = FALSE) {
+        pts2tiles = list(), tiles2hex = list(), topic_model = list(),
+        threads = default_threads(), bin = NULL, python = NULL,
+        overwrite = FALSE) {
     chk <- check_punkst_setup(bin = bin, python = python, quiet = TRUE)
     if (!chk$bin_ok || !chk$python_ok) {
         print(chk)
@@ -397,14 +568,18 @@ run_punkst_pipeline <- function(sdata, workdir, export = list(),
     tsv <- file.path(workdir, "transcripts.tsv")
     do.call(sdata_export, c(list(sdata = sdata, out = tsv, python = python,
                                  overwrite = overwrite), export))
-    tiles <- punkst_pts2tiles(tsv, workdir, tile_size, threads, bin, overwrite)
-    hex <- punkst_tiles2hex(tiles, hex_grid_dist, min_count, seed, threads, bin,
-                            overwrite)
-    tm_args <- utils::modifyList(
-        list(seed = seed, threads = threads), topic_model)
-    model <- do.call(punkst_topic_model,
-                     c(list(hex = hex, n_topics = n_topics, bin = bin,
-                            overwrite = overwrite), tm_args))
+    # pipeline-level defaults, each overridable through the argument lists
+    p2t <- utils::modifyList(list(tile_size = 500, threads = threads), pts2tiles)
+    tiles <- do.call(punkst_pts2tiles, c(list(tsv = tsv, workdir = workdir, bin = bin,
+                                              overwrite = overwrite), p2t))
+    t2h <- utils::modifyList(list(hex_grid_dist = 12, min_count = 20, randomize = TRUE,
+                                  seed = 1, threads = threads), tiles2hex)
+    hex <- do.call(punkst_tiles2hex, c(list(tiles = tiles, bin = bin,
+                                            overwrite = overwrite), t2h))
+    tm <- utils::modifyList(list(n_topics = 12, seed = 1, threads = threads),
+                            topic_model)
+    model <- do.call(punkst_topic_model, c(list(hex = hex, bin = bin,
+                                                overwrite = overwrite), tm))
     structure(list(transcripts = tsv, tiles = tiles, hex = hex, model = model),
               class = "punkstRun")
 }

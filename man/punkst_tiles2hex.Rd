@@ -6,10 +6,34 @@
 \usage{
 punkst_tiles2hex(
   tiles,
-  hex_grid_dist = 12,
-  min_count = 20,
-  seed = 1,
-  threads = default_threads(),
+  hex_grid_dist = NULL,
+  hex_size = NULL,
+  bcc_grid_dist = NULL,
+  bcc_size = NULL,
+  icol_x = tiles$params$icol_x,
+  icol_y = tiles$params$icol_y,
+  icol_feature = tiles$params$icol_feature,
+  icol_z = NULL,
+  icol_int = NULL,
+  feature_dict = tiles$files$features,
+  min_count = NULL,
+  bounding_boxes = NULL,
+  anchor_files = NULL,
+  radius = NULL,
+  ignore_background = FALSE,
+  idf_q = 95,
+  idf_power = 0.3,
+  idf_min = 0.1,
+  idf_max = 5,
+  randomize = FALSE,
+  seed = -1L,
+  sort_mem = NULL,
+  use_internal_sort = FALSE,
+  out_prefix = NULL,
+  temp_dir = NULL,
+  threads = 1L,
+  verbose = 1000000L,
+  debug = 0L,
   bin = NULL,
   overwrite = FALSE
 )
@@ -17,22 +41,72 @@ punkst_tiles2hex(
 \arguments{
 \item{tiles}{A \code{punkstTiles} object from \code{\link[=punkst_pts2tiles]{punkst_pts2tiles()}}.}
 
-\item{hex_grid_dist}{Centre-to-centre hexagon spacing (microns).}
+\item{hex_grid_dist, hex_size}{Hexagon centre-to-centre distance
+(\code{--hex-grid-dist}) or side length (\code{--hex-size}).}
 
-\item{min_count}{Minimum transcripts for a hexagon to be kept.}
+\item{bcc_grid_dist, bcc_size}{BCC lattice spacing (\code{--bcc-grid-dist}) or
+size (\code{--bcc-size}) for 3D aggregation.}
 
-\item{seed}{Random seed for the hexagon order.}
+\item{icol_x, icol_y, icol_feature}{0-based columns in the tiled file
+(\code{--icol-x}, \code{--icol-y}, \code{--icol-feature}); default to the values used in
+\code{\link[=punkst_pts2tiles]{punkst_pts2tiles()}}.}
 
-\item{threads}{Number of threads.}
+\item{icol_z}{0-based z column, which enables 3D aggregation (\code{--icol-z}).}
+
+\item{icol_int}{0-based integer-value columns (\code{--icol-int}).}
+
+\item{feature_dict}{Feature name list for non-integer feature columns
+(\code{--feature-dict}); defaults to the tiling stage's feature file.}
+
+\item{min_count}{Minimum count per integer column for a unit to be kept,
+combined with OR (\code{--min-count}); punkst's default keeps units with at
+least 1.}
+
+\item{bounding_boxes}{Rectangular regions \verb{(xmin ymin xmax ymax)*} to
+restrict to (\code{--bounding-boxes}).}
+
+\item{anchor_files, radius, ignore_background}{Aggregate around anchor points
+instead of a grid (\code{--anchor-files}, \code{--radius}, \code{--ignore-background}).}
+
+\item{idf_q, idf_power, idf_min, idf_max}{Parameters of the capped IDF feature
+weights (\code{--idf-q}, \code{--idf-power}, \code{--idf-min}, \code{--idf-max}).}
+
+\item{randomize}{Randomise the output order (\code{--randomize}). punkst does not
+by default; online topic-model training generally benefits from it.}
+
+\item{seed}{Seed for the randomised output keys (\code{--seed}); \code{-1} draws a
+random one.}
+
+\item{sort_mem}{Memory for sorting with K, M or G units (\code{--sort-mem}).}
+
+\item{use_internal_sort}{Use punkst's internal sort instead of the system
+\code{sort} (\code{--use-internal-sort}).}
+
+\item{out_prefix}{Output stem; default \verb{<workdir>/hex_<grid size>}.}
+
+\item{temp_dir}{Directory for temporary files; default
+\verb{<workdir>/tmp_tiles2hex}.}
+
+\item{threads}{Number of threads (\code{--threads}).}
+
+\item{verbose, debug}{Verbosity and debug level.}
 
 \item{bin}{Path to \code{punkst}; see \code{\link[=punkst_setup]{punkst_setup()}}.}
 
 \item{overwrite}{Re-run even if up to date.}
 }
 \value{
-A \code{punkstHex} stage object; \code{files$data} and \code{files$meta} feed
-\code{\link[=punkst_topic_model]{punkst_topic_model()}}.
+A \code{punkstHex} stage object; \code{files$data}, \code{files$meta} and
+\code{files$features} feed \code{\link[=punkst_topic_model]{punkst_topic_model()}}.
 }
 \description{
-Pool transcripts into hexagons (\verb{punkst tiles2hex})
+Aggregates tiled points into hexagonal units (or 3D BCC units) and writes a
+sparse count file plus JSON metadata. Defaults are punkst's own and an
+option is passed only when it differs. Column indices default to those used
+when tiling (\code{tiles$params}).
+}
+\details{
+Give exactly the grid you need: \code{hex_grid_dist} or \code{hex_size} for 2D, or
+\code{bcc_grid_dist} or \code{bcc_size} (with \code{icol_z}) for 3D. punkst has no default
+size.
 }

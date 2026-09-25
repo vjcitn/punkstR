@@ -7,28 +7,102 @@
 punkst_pts2tiles(
   tsv,
   workdir,
-  tile_size = 500,
-  threads = default_threads(),
+  tile_size,
+  icol_x = 0L,
+  icol_y = 1L,
+  icol_feature = 2L,
+  icol_z = NULL,
+  icol_int = NULL,
+  csv = FALSE,
+  keep_quotes = NULL,
+  skip = 0L,
+  skip_last_is_header = FALSE,
+  scale = 1,
+  scale_x = NULL,
+  scale_y = NULL,
+  scale_z = NULL,
+  digits = 2L,
+  include_cols = NULL,
+  exclude_cols = NULL,
+  tile_buffer = 1000L,
+  batch_size = 10000L,
+  temp_dir = NULL,
+  threads = 1L,
+  verbose = 1000000L,
+  debug = 0L,
   bin = NULL,
   overwrite = FALSE
 )
 }
 \arguments{
-\item{tsv}{Transcript file from \code{\link[=sdata_export]{sdata_export()}} (columns x, y, feature).}
+\item{tsv}{Input delimited file (\verb{--in-tsv}), e.g. from \code{\link[=sdata_export]{sdata_export()}}.}
 
 \item{workdir}{Directory for outputs, logs and the manifest.}
 
-\item{tile_size}{Tile size in the same units as the coordinates (microns).}
+\item{tile_size}{Tile size in the input's coordinate units (\code{--tile-size}).
+Required.}
 
-\item{threads}{Number of threads.}
+\item{icol_x, icol_y, icol_feature}{0-based columns of x, y and feature
+(\code{--icol-x}, \code{--icol-y}, \code{--icol-feature}). \code{icol_feature = NULL} omits
+the feature column and the feature dictionary output.}
+
+\item{icol_z}{Optional 0-based z column (\code{--icol-z}).}
+
+\item{icol_int}{Optional 0-based integer-value (count) columns
+(\code{--icol-int}).}
+
+\item{csv}{Treat the input as CSV (\code{--csv}); punkst otherwise infers it from
+the file extension.}
+
+\item{keep_quotes}{0-based columns to keep quoted in CSV output
+(\code{--keep-quotes}).}
+
+\item{skip}{Number of input lines to skip (\code{--skip}).}
+
+\item{skip_last_is_header}{Treat the last skipped line as the header
+(\code{--skip-last-is-header}). Lines starting with \verb{#} at the top are
+detected automatically, so this is not needed for \code{\link[=sdata_export]{sdata_export()}}
+output.}
+
+\item{scale}{Uniform coordinate scale factor (\code{--scale}).}
+
+\item{scale_x, scale_y, scale_z}{Per-axis scale factors that override \code{scale}
+(\code{--scale-x}, \code{--scale-y}, \code{--scale-z}).}
+
+\item{digits}{Precision of rewritten coordinates when scaling is applied
+(\code{--digits}).}
+
+\item{include_cols, exclude_cols}{0-based columns to keep or drop in the
+tiled output (\code{--include-cols}, \code{--exclude-cols}; mutually exclusive). The
+column positions in the tiled file then differ from the input, so pass
+matching \verb{icol_*} to \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}}.}
+
+\item{tile_buffer}{Buffer lines per tile per thread (\code{--tile-buffer}).}
+
+\item{batch_size}{Batch size in lines for gzipped or streamed input
+(\code{--batch-size}).}
+
+\item{temp_dir}{Directory for temporary files (\code{--temp-dir}); default is
+\verb{<workdir>/tmp_pts2tiles}.}
+
+\item{threads}{Number of threads (\code{--threads}).}
+
+\item{verbose, debug}{Verbosity and debug level (\code{--verbose}, \code{--debug}).}
 
 \item{bin}{Path to \code{punkst}; see \code{\link[=punkst_setup]{punkst_setup()}}.}
 
 \item{overwrite}{Re-run even if up to date.}
 }
 \value{
-A \code{punkstTiles} stage object with the output \code{files}.
+A \code{punkstTiles} stage object with the output \code{files} (\code{tsv},
+\code{index}, \code{coord_range}, and \code{features} when a feature column is given).
 }
 \description{
-Tile a transcript file (\verb{punkst pts2tiles})
+Splits a delimited point file into spatial tiles and writes an index. Covers
+the standard mode of \verb{punkst pts2tiles}; the \code{--tile-op-factor-tsv} mode
+(converting factor-probability output, with \code{--binary-out}, \code{--K},
+\code{--pixel-res}, \code{--feature-dict}) is not wrapped. Defaults are punkst's own,
+and an option is passed only when it differs from its default, except that
+the column indices default to 0, 1 and 2 (x, y, feature), the layout
+written by \code{\link[=sdata_export]{sdata_export()}}, where punkst has no default.
 }

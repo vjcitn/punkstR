@@ -48,13 +48,13 @@ are microns, which is what punkst expects, hence `"intrinsic"`.
 run <- run_punkst_pipeline(
     "data.zarr", workdir = "xenium_run",
     export = list(coordinate_system = "intrinsic", min_qv = 20),
-    hex_grid_dist = 12, n_topics = 12,
-    topic_model = list(n_epochs = 2, sort_topics = TRUE,
+    tiles2hex = list(hex_grid_dist = 12),
+    topic_model = list(n_topics = 12, n_epochs = 2, sort_topics = TRUE,
                        exclude_feature_regex = xenium_control_regex()))
 run$model$files$results   # per-hexagon topic probabilities
 ```
 
-`punkst_topic_model()` exposes the options of `punkst topic-model` for hexagon input, with punkst's own defaults (see `?punkst_topic_model`).
+Each stage function exposes the options of the matching punkst command with punkst's own defaults (see `?punkst_pts2tiles`, `?punkst_tiles2hex`, `?punkst_topic_model`), and `run_punkst_pipeline()` takes each stage's options as a list.
 
 You can also call the stages one at a time (`sdata_export()`, `punkst_pts2tiles()`,
 `punkst_tiles2hex()`, `punkst_topic_model()`), each taking the previous stage's

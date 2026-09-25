@@ -1,7 +1,14 @@
 test_that("stage wrappers fail clearly on bad inputs", {
-    expect_error(punkst_pts2tiles(tempfile(), tempdir(), bin = "/bin/sh"),
+    expect_error(punkst_pts2tiles(tempfile(), tempdir(), tile_size = 100, bin = "/bin/sh"),
                  "Input not found")
     expect_error(punkst_tiles2hex(list()), "inherits")
+    expect_error(punkst_pts2tiles(tempfile(), tempdir(), bin = "/bin/sh"), "tile_size")
+    tsv <- tempfile(); writeLines("a", tsv)
+    expect_error(punkst_pts2tiles(tsv, tempdir(), tile_size = 1, include_cols = 0,
+                                  exclude_cols = 1, bin = "/bin/sh"), "mutually")
+    tiles <- structure(list(workdir = tempdir(), files = list(), params = list()),
+                       class = c("punkstTiles", "punkstStage"))
+    expect_error(punkst_tiles2hex(tiles, bin = "/bin/sh"), "hex_grid_dist")
 })
 
 test_that("topic_model builds arguments and validates inputs", {
@@ -47,9 +54,9 @@ test_that("full pipeline separates the two structured regions", {
 
     wd <- tempfile()
     run <- suppressMessages(run_punkst_pipeline(
-        zarr, wd, tile_size = 100, hex_grid_dist = 12, min_count = 5,
-        n_topics = 2, topic_model = list(n_epochs = 5, min_count_train = 5), threads = 2,
-        export = list(coordinate_system = NULL)))
+        zarr, wd, threads = 2, export = list(coordinate_system = NULL),
+        pts2tiles = list(tile_size = 100), tiles2hex = list(min_count = 5),
+        topic_model = list(n_topics = 2, n_epochs = 5, min_count_train = 5)))
     expect_s3_class(run, "punkstRun")
     expect_true(all(file.exists(unlist(run$model$files))))
 
@@ -61,7 +68,7 @@ test_that("full pipeline separates the two structured regions", {
 
     # second call reuses everything
     expect_message(run_punkst_pipeline(
-        zarr, wd, tile_size = 100, hex_grid_dist = 12, min_count = 5,
-        n_topics = 2, topic_model = list(n_epochs = 5, min_count_train = 5), threads = 2,
-        export = list(coordinate_system = NULL)), "up to date")
+        zarr, wd, threads = 2, export = list(coordinate_system = NULL),
+        pts2tiles = list(tile_size = 100), tiles2hex = list(min_count = 5),
+        topic_model = list(n_topics = 2, n_epochs = 5, min_count_train = 5)), "up to date")
 })

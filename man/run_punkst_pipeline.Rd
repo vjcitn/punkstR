@@ -8,12 +8,9 @@ run_punkst_pipeline(
   sdata,
   workdir,
   export = list(),
-  tile_size = 500,
-  hex_grid_dist = 12,
-  min_count = 20,
-  n_topics,
+  pts2tiles = list(),
+  tiles2hex = list(),
   topic_model = list(),
-  seed = 1,
   threads = default_threads(),
   bin = NULL,
   python = NULL,
@@ -25,12 +22,12 @@ run_punkst_pipeline(
 
 \item{workdir}{Directory for all outputs.}
 
-\item{export}{A list of extra arguments for \code{\link[=sdata_export]{sdata_export()}}.}
+\item{export, pts2tiles, tiles2hex, topic_model}{Named lists of arguments for
+\code{\link[=sdata_export]{sdata_export()}}, \code{\link[=punkst_pts2tiles]{punkst_pts2tiles()}}, \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}} and
+\code{\link[=punkst_topic_model]{punkst_topic_model()}}, e.g.
+\code{topic_model = list(n_topics = 8, exclude_feature_regex = xenium_control_regex())}.}
 
-\item{tile_size, hex_grid_dist, min_count, n_topics, seed, threads}{See the individual stage functions.}
-
-\item{topic_model}{A list of further arguments for \code{\link[=punkst_topic_model]{punkst_topic_model()}},
-e.g. \code{list(n_epochs = 2, exclude_feature_regex = xenium_control_regex())}.}
+\item{threads}{Threads for the punkst stages.}
 
 \item{bin, python}{See \code{\link[=punkst_setup]{punkst_setup()}}.}
 
@@ -43,4 +40,12 @@ and \code{model}.
 \description{
 Chains \code{\link[=sdata_export]{sdata_export()}}, \code{\link[=punkst_pts2tiles]{punkst_pts2tiles()}}, \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}} and
 \code{\link[=punkst_topic_model]{punkst_topic_model()}} in \code{workdir}. Finished stages are skipped on re-run.
+}
+\details{
+Each stage takes its options as a list, so every option of the stage
+functions is reachable. The pipeline sets these defaults, which override the
+stage functions' punkst defaults and are themselves overridden by your
+lists: \code{tile_size = 500}; \code{hex_grid_dist = 12}, \code{min_count = 20},
+\code{randomize = TRUE}, \code{seed = 1}; \code{n_topics = 12}, \code{seed = 1}. \code{threads}
+applies to all three punkst stages.
 }
