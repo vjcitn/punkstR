@@ -121,7 +121,7 @@ training (\code{--model-prior}).}
 \item{background_prior}{File with a background prior vector
 (\code{--background-prior}).}
 
-\item{background_init_scale, background_prevalence_power, fix_background, }{bg_fraction_prior_a0,bg_fraction_prior_b0,warm_start_epochs Background
+\item{background_init_scale, background_prevalence_power, fix_background, bg_fraction_prior_a0, bg_fraction_prior_b0, warm_start_epochs}{Background
 model settings (\code{--background-init-scale}, \code{--background-prevalence-power},
 \code{--fix-background}, \code{--bg-fraction-prior-a0}, \code{--bg-fraction-prior-b0},
 \code{--warm-start-epochs}).}
@@ -140,7 +140,7 @@ topics and refit (\code{--adaptive-topics}).}
 \item{topk_only}{If set, write only the top-k topics per unit to the
 results file (\code{--topk-only}).}
 
-\item{residuals, feature_residuals, feature_diagnostics_cheap, }{unit_diagnostics_similarity,pseudobulk_all_features Diagnostic and output
+\item{residuals, feature_residuals, feature_diagnostics_cheap, unit_diagnostics_similarity, pseudobulk_all_features}{Diagnostic and output
 options (flags of the same names).}
 
 \item{count_cache, count_cache_memory_budget}{Repeated-pass count cache

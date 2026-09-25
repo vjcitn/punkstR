@@ -368,8 +368,7 @@ opt_arg <- function(args, flag, value, default = NULL) {
 #'   (`--fit-background`).
 #' @param background_prior File with a background prior vector
 #'   (`--background-prior`).
-#' @param background_init_scale,background_prevalence_power,fix_background,
-#'   bg_fraction_prior_a0,bg_fraction_prior_b0,warm_start_epochs Background
+#' @param background_init_scale,background_prevalence_power,fix_background,bg_fraction_prior_a0,bg_fraction_prior_b0,warm_start_epochs Background
 #'   model settings (`--background-init-scale`, `--background-prevalence-power`,
 #'   `--fix-background`, `--bg-fraction-prior-a0`, `--bg-fraction-prior-b0`,
 #'   `--warm-start-epochs`).
@@ -382,8 +381,7 @@ opt_arg <- function(args, flag, value, default = NULL) {
 #' @param sort_topics Sort topics by weight (`--sort-topics`).
 #' @param topk_only If set, write only the top-k topics per unit to the
 #'   results file (`--topk-only`).
-#' @param residuals,feature_residuals,feature_diagnostics_cheap,
-#'   unit_diagnostics_similarity,pseudobulk_all_features Diagnostic and output
+#' @param residuals,feature_residuals,feature_diagnostics_cheap,unit_diagnostics_similarity,pseudobulk_all_features Diagnostic and output
 #'   options (flags of the same names).
 #' @param count_cache,count_cache_memory_budget Repeated-pass count cache
 #'   (`--count-cache`: `"off"`, `"on"`, `"auto"`; `--count-cache-memory-budget`
