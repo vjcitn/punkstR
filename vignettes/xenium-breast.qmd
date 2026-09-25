@@ -154,7 +154,18 @@ cat(sprintf("hexagon x gene matrix: %d x %d, %s nonzeros\n",
             nrow(X), ncol(X), format(length(X@x), big.mark = ",")))
 ```
 
-The transcript density of the whole section, one point per hexagon:
+The transcript density of the whole section, one point per hexagon.
+
+A note on all the maps in this document: each hexagon is drawn as a small
+square centred on the hexagon, not as a true hexagon, and the square's size
+(`cex` in the plotting calls) is a display choice. It is set per figure by eye,
+about 0.08 for the small per-topic panels and 0.12 to 0.16 for the larger maps.
+Too small a size leaves gaps between rows of hexagons that show up as faint
+stripes; larger sizes make neighbouring squares overlap slightly, which makes the
+maps look smoother than the underlying 12 um units. Points are drawn in ascending
+order of the plotted value where a continuous value is shown, so the highest
+values sit on top. The maps show values per 12 um hexagon, not per cell.
+
 
 ```{r}
 #| fig-height: 6.6
