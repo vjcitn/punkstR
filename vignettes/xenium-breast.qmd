@@ -160,8 +160,8 @@ A note on all the maps in this document: each hexagon is drawn as a small
 square centred on the hexagon, not as a true hexagon, and the square's size
 (`cex` in the plotting calls) is a display choice. It is set per figure by eye,
 about 0.08 for the small per-topic panels and 0.12 to 0.16 for the larger maps.
-Too small a size leaves gaps between rows of hexagons that show up as faint
-stripes; larger sizes make neighbouring squares overlap slightly, which makes the
+Too small a size leaves gaps between hexagons that show up as a washed-out,
+grainy look or faint stripes (compared side by side for one gene in the tumor-marker section); larger sizes make neighbouring squares overlap slightly, which makes the
 maps look smoother than the underlying 12 um units. Points are drawn in ascending
 order of the plotted value where a continuous value is shown, so the highest
 values sit on top. The maps show values per 12 um hexagon, not per cell.
@@ -475,6 +475,30 @@ for (g in tumor_genes) {
                  main = sprintf("%s (colour scale 0 to %.1f)", g, vmax),
                  axes = FALSE, xlab = "", ylab = "")
 }
+par(op)
+```
+
+### Marker size and striping
+
+The maps above use `cex = 0.16`. Here is the same `ERBB2` map drawn with
+`cex = 0.1` on the left and `cex = 0.16` on the right, to show the effect of the
+marker size described earlier. With the smaller squares the map looks washed out and grainy, and
+horizontal striping along the rows of hexagons can appear (it was pronounced in
+the 2 x 4 layout of the maps above when they were first drawn with this size),
+because the squares do not fully cover the spacing between hexagons and the
+background shows through. The data are identical in both panels.
+
+```{r}
+#| fig-width: 14
+#| fig-height: 5.6
+v <- rate[, "ERBB2"]
+o <- order(v)
+vmax <- max(quantile(v[v > 0], 0.99), 1e-9)
+pal <- hcl.colors(100, "inferno")
+op <- par(mfrow = c(1, 2), mar = c(1, 1, 2, 1))
+for (cx in c(0.1, 0.16))
+    spatial_plot(units$x[o], units$y[o], scale_col(v[o], pal, 0, vmax), cex = cx,
+                 main = sprintf("ERBB2, cex = %.2f", cx), axes = FALSE, xlab = "", ylab = "")
 par(op)
 ```
 
