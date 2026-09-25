@@ -62,6 +62,30 @@ result. Each stage writes a log in `workdir`, and a manifest records its
 parameters and inputs; re-running skips stages whose outputs exist and whose
 parameters and input files are unchanged (`overwrite = TRUE` forces a re-run).
 
+## Write results back and compare tuning runs
+
+```r
+run <- run_punkst_pipeline("data.zarr", "work",
+                           topic_model = list(n_topics = 12))
+sdata_writeback(run)                      # -> data_punkst.zarr (sidecar store)
+sdata_writeback(run, in_place = TRUE)     # -> into data.zarr itself
+
+# explore other settings; each run gets its own elements in the store
+run8 <- run_punkst_pipeline("data.zarr", "work",
+                            topic_model = list(n_topics = 8))
+sdata_writeback(run8)
+
+sdata_runs("data_punkst.zarr")            # runs with recorded parameters
+punkst_compare_runs(run, run8)            # topic pairing + hexagon agreement
+```
+
+Each run adds a `shapes` element `punkst_<run>_hexagons` (with the source
+points' transformations, so hexagons overlay transcripts and images) and a
+`table` `punkst_<run>` (counts, `obsm["topics"]`, `varm["loadings"]`, run
+parameters in `uns`). Runs never overwrite each other unless `overwrite = TRUE`.
+Vary hexagon size or other settings by using a different `work` directory or
+a `name`.
+
 ## Building punkst
 
 The canonical recipe is in the punkst documentation:

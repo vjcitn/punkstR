@@ -34,8 +34,9 @@ run_punkst_pipeline(
 \item{overwrite}{Re-run all stages.}
 }
 \value{
-A \code{punkstRun} object with elements \code{transcripts}, \code{tiles}, \code{hex}
-and \code{model}.
+A \code{punkstRun} object with elements \code{transcripts}, \code{tiles}, \code{hex},
+\code{model} and \code{source} (the store, points element and coordinate system used
+for export, which \code{\link[=sdata_writeback]{sdata_writeback()}} reuses).
 }
 \description{
 Chains \code{\link[=sdata_export]{sdata_export()}}, \code{\link[=punkst_pts2tiles]{punkst_pts2tiles()}}, \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}} and

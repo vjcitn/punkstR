@@ -611,8 +611,9 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
 #' @param threads Threads for the punkst stages.
 #' @param bin,python See [punkst_setup()].
 #' @param overwrite Re-run all stages.
-#' @return A `punkstRun` object with elements `transcripts`, `tiles`, `hex`
-#'   and `model`.
+#' @return A `punkstRun` object with elements `transcripts`, `tiles`, `hex`,
+#'   `model` and `source` (the store, points element and coordinate system used
+#'   for export, which [sdata_writeback()] reuses).
 #' @export
 run_punkst_pipeline <- function(sdata, workdir, export = list(),
         pts2tiles = list(), tiles2hex = list(), topic_model = list(),
@@ -639,8 +640,13 @@ run_punkst_pipeline <- function(sdata, workdir, export = list(),
                             topic_model)
     model <- do.call(punkst_topic_model, c(list(hex = hex, bin = bin,
                                                 overwrite = overwrite), tm))
-    structure(list(transcripts = tsv, tiles = tiles, hex = hex, model = model),
-              class = "punkstRun")
+    # what sdata_writeback() needs to align results with the source store
+    source <- list(sdata = sdata,
+                   points_key = if (is.null(export$points_key)) "transcripts" else export$points_key,
+                   coordinate_system = if ("coordinate_system" %in% names(export))
+                       export$coordinate_system else "intrinsic")
+    structure(list(transcripts = tsv, tiles = tiles, hex = hex, model = model,
+                   source = source), class = "punkstRun")
 }
 
 #' Print a pipeline run
