@@ -68,7 +68,7 @@ sdata_demo(
 tryCatch(
     sdata_demo(file.path(tempdir(), "demo.zarr"), n_points = 200L),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: make_synthetic_sdata.py failed with exit status 1. Last log lines (/tmp/RtmpzOxovb/sdata_demo197a5a2fcebb.log):
+#> spatialdata not available: make_synthetic_sdata.py failed with exit status 1. Last log lines (/tmp/Rtmp9cP0D1/sdata_demo1aa4cd65ae9.log):
 #> Traceback (most recent call last):
 #>   File "<string>", line 1, in <module>
 #>   File "/home/runner/work/_temp/Library/punkstR/python/make_synthetic_sdata.py", line 4, in <module>

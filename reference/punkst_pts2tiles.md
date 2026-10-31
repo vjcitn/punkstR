@@ -161,9 +161,9 @@ tryCatch(
     error = function(e) message("punkst not available: ", conditionMessage(e)))
 #> [punkstR] pts2tiles: running
 #> [punkstR] pts2tiles: done in 0 s
-#> <punkstTiles> in /tmp/RtmpzOxovb/file197a3ef3888b
-#>   tsv       /tmp/RtmpzOxovb/file197a3ef3888b/tiled.tsv
-#>   index     /tmp/RtmpzOxovb/file197a3ef3888b/tiled.index
-#>   coord_range /tmp/RtmpzOxovb/file197a3ef3888b/tiled.coord_range.tsv
-#>   features  /tmp/RtmpzOxovb/file197a3ef3888b/tiled.features.tsv
+#> <punkstTiles> in /tmp/Rtmp9cP0D1/file1aa414afe66
+#>   tsv       /tmp/Rtmp9cP0D1/file1aa414afe66/tiled.tsv
+#>   index     /tmp/Rtmp9cP0D1/file1aa414afe66/tiled.index
+#>   coord_range /tmp/Rtmp9cP0D1/file1aa414afe66/tiled.coord_range.tsv
+#>   features  /tmp/Rtmp9cP0D1/file1aa414afe66/tiled.features.tsv
 ```

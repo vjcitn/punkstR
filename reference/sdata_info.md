@@ -48,7 +48,7 @@ A list with `points` (per element: `columns`, `attrs`, `rows`, `max_x`,
 ``` r
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/RtmpzOxovb/demo.zarr' already exists
+#> Warning: '/tmp/Rtmp9cP0D1/demo.zarr' already exists
 res <- tryCatch(sdata_info(store), error = function(e) NULL)
 res
 #> NULL

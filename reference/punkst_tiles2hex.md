@@ -166,20 +166,20 @@ tryCatch(
     punkst_tiles2hex(tiles, hex_size = 50),
     error = function(e) message("punkst not available: ", conditionMessage(e)))
 #> [punkstR] tiles2hex_hexsize_50: running
-#> punkst not available: punkst tiles2hex failed with exit status 134. Last log lines (/tmp/RtmpzOxovb/tiles2hex_hexsize_50.log):
-#>     --in-tsv [/tmp/RtmpzOxovb/file197a7016be54],
-#>     --in-index [/tmp/RtmpzOxovb/file197a56dab4d6], --icol-x [0], --icol-y [1],
+#> punkst not available: punkst tiles2hex failed with exit status 134. Last log lines (/tmp/Rtmp9cP0D1/tiles2hex_hexsize_50.log):
+#>     --in-tsv [/tmp/Rtmp9cP0D1/file1aa46ab26b75],
+#>     --in-index [/tmp/Rtmp9cP0D1/file1aa46e99971f], --icol-x [0], --icol-y [1],
 #>     --icol-z [-1], --icol-feature [2],
-#>     --feature-dict [/tmp/RtmpzOxovb/file197a1d0f098e], --icol-int,
+#>     --feature-dict [/tmp/Rtmp9cP0D1/file1aa452e3fec1], --icol-int,
 #>     --bounding-boxes, --anchor-files, --radius, --hex-size [50],
 #>     --hex-grid-dist [-1], --bcc-size [-1], --bcc-grid-dist [-1],
-#>     --temp-dir [/tmp/RtmpzOxovb/tmp_tiles2hex], --seed [-1], --threads [1],
-#>     --out [/tmp/RtmpzOxovb/hexsize_50.txt], --randomize [false], --sort-mem,
+#>     --temp-dir [/tmp/Rtmp9cP0D1/tmp_tiles2hex], --seed [-1], --threads [1],
+#>     --out [/tmp/Rtmp9cP0D1/hexsize_50.txt], --randomize [false], --sort-mem,
 #>     --use-internal-sort [false], --idf-q [95], --idf-power [0.3], --idf-min [0.1],
 #>     --idf-max [5], --min-count, --ignore-background [false], --verbose [1000000],
 #>     --debug [0]
 #> 
 #> terminate called after throwing an instance of 'std::runtime_error'
-#>   what():  [2026-10-31 14:41:19] ERROR: Error opening index file: /tmp/RtmpzOxovb/file197a56dab4d6
+#>   what():  [2026-10-31 14:46:45] ERROR: Error opening index file: /tmp/Rtmp9cP0D1/file1aa46e99971f
 #> Aborted (core dumped)
 ```
