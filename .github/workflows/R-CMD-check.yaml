@@ -43,6 +43,10 @@ jobs:
           pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
           echo "PUNKST_PYTHON=$(which python)" >> "$GITHUB_ENV"
           python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
+          # rcmdcheck runs R CMD check in a sanitized subprocess that drops
+          # arbitrary inherited env vars, so GITHUB_ENV alone isn't enough;
+          # ~/.Renviron is read by R itself at startup and survives that.
+          echo "PUNKST_PYTHON=$(which python)" >> ~/.Renviron
 
       # Prebuilt Linux binary from the upstream punkst releases; avoids a
       # from-source C++ build (cmake/TBB/etc.) just to run CI. The baseline
@@ -63,6 +67,7 @@ jobs:
           "./${dir}/bin/env-check" || true
           echo "${PWD}/${dir}/bin" >> "$GITHUB_PATH"
           echo "PUNKST=${PWD}/${dir}/bin/punkst" >> "$GITHUB_ENV"
+          echo "PUNKST=${PWD}/${dir}/bin/punkst" >> ~/.Renviron
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
