@@ -53,11 +53,19 @@ jobs:
           /opt/punkst-venv/bin/pip install --upgrade pip
           /opt/punkst-venv/bin/pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
           echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> "$GITHUB_ENV"
+          # A later step (setup-r-dependencies, apt-installing BiocCheck's
+          # system libs) rebuilds the ldconfig cache, which can shadow the
+          # toolcache's own libpython3.12.so.1.0 with an incompatible one
+          # found via a default search path -- surfacing as a ctypes
+          # "undefined symbol" only once that step has run. Pin
+          # LD_LIBRARY_PATH to the toolcache's lib dir so it keeps winning.
+          echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           /opt/punkst-venv/bin/python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
           # rcmdcheck runs R CMD check in a sanitized subprocess that drops
           # arbitrary inherited env vars, so GITHUB_ENV alone isn't enough;
           # ~/.Renviron is read by R itself at startup and survives that.
           echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> ~/.Renviron
+          echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> ~/.Renviron
 
       # Prebuilt Linux binary from the upstream punkst releases; avoids a
       # from-source C++ build (cmake/TBB/etc.) just to run CI. The baseline
