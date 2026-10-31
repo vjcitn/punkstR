@@ -36,11 +36,11 @@ recorded `tiles2hex` and `topic_model` parameters.
 # Requires a Python interpreter with spatialdata; skipped otherwise.
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/RtmpQPAIGS/demo.zarr' already exists
+#> Warning: '/tmp/RtmprHvtcE/demo.zarr' already exists
 tryCatch(
     sdata_runs(store),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: punkst_to_sdata.py list failed with exit status 1. Last log lines (/tmp/RtmpQPAIGS/runs1c423b6cb2d6.log):
+#> spatialdata not available: punkst_to_sdata.py list failed with exit status 1. Last log lines (/tmp/RtmprHvtcE/runs19c66de9dc4d.log):
 #> Traceback (most recent call last):
 #>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 17, in <module>
 #>     import pandas as pd

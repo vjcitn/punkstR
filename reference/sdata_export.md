@@ -87,7 +87,7 @@ dir.create(store)
 tryCatch(
     sdata_export(store, tempfile(fileext = ".tsv")),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: spatialdata_to_punkst.py failed with exit status 1. Last log lines (/tmp/RtmpQPAIGS/file1c427b37363f.tsv.export.log):
+#> spatialdata not available: spatialdata_to_punkst.py failed with exit status 1. Last log lines (/tmp/RtmprHvtcE/file19c627f5b6d3.tsv.export.log):
 #> Traceback (most recent call last):
 #>   File "/home/runner/work/_temp/Library/punkstR/python/spatialdata_to_punkst.py", line 23, in <module>
 #>     import pandas as pd
