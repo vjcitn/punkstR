@@ -19,6 +19,38 @@ jobs:
         with:
           use-public-rspm: true
 
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # No reticulate: punkstR only ever shells out to Python with system2(),
+      # so installing these into whatever interpreter PUNKST_PYTHON points at
+      # is all the R side needs.
+      - name: Install Python dependencies (spatialdata and friends)
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
+          echo "PUNKST_PYTHON=$(which python)" >> "$GITHUB_ENV"
+
+      # Prebuilt Linux binary from the upstream punkst releases; avoids a
+      # from-source C++ build (cmake/TBB/etc.) just to run CI. The baseline
+      # x86_64 build (no -v3/-v4 CPU tuning) is the safest match for an
+      # unknown GitHub-hosted runner CPU.
+      - name: Install punkst binary
+        run: |
+          set -euo pipefail
+          tag="v0.1.2"
+          asset="punkst-0.1.2-linux-x86_64-glibc2.28.tar.gz"
+          curl -fsSL -o punkst.tar.gz \
+            "https://github.com/Yichen-Si/punkst/releases/download/${tag}/${asset}"
+          tar -xzf punkst.tar.gz
+          dir=$(tar -tzf punkst.tar.gz | head -1 | cut -f1 -d/)
+          "./${dir}/bin/env-check"
+          echo "${PWD}/${dir}/bin" >> "$GITHUB_PATH"
+          echo "PUNKST=${PWD}/${dir}/bin/punkst" >> "$GITHUB_ENV"
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
@@ -26,13 +58,9 @@ jobs:
             bioc::BiocCheck
           needs: check
 
-      # No 'punkst' binary and no spatialdata-enabled Python are installed
-      # here, so the vignette (which needs both) is skipped; the man-page
-      # examples that need them already degrade gracefully via tryCatch().
       - uses: r-lib/actions/check-r-package@v2
         with:
-          args: 'c("--no-manual", "--no-build-vignettes")'
-          build_args: 'c("--no-build-vignettes")'
+          args: 'c("--no-manual")'
           error-on: '"error"'
 
       - name: BiocCheck
