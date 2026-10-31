@@ -52,12 +52,29 @@ jobs:
           python -m venv /opt/punkst-venv
           /opt/punkst-venv/bin/pip install --upgrade pip
           /opt/punkst-venv/bin/pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
-          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> "$GITHUB_ENV"
           /opt/punkst-venv/bin/python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
+          # setup-r-dependencies (later) apt-installs BiocCheck's system libs,
+          # which pulls in Ubuntu's own (older) libpython3.12 as a transitive
+          # dependency and ends up shadowing the toolcache's own libpython via
+          # LD_LIBRARY_PATH, missing a CPython-internal symbol ctypes needs.
+          # LD_PRELOAD fixes that -- but only for the python process itself:
+          # setting it job-wide (via GITHUB_ENV) also leaks into unrelated
+          # subprocesses spawned later in the same job (quarto's Deno
+          # renderer, the punkst binary during vignette building), which
+          # don't expect a libpython preloaded into them and misbehave. A
+          # wrapper script confines LD_PRELOAD to just the python exec, so
+          # PUNKST_PYTHON is pointed at this instead of the bare interpreter.
+          cat > /opt/punkst-venv/bin/python-preload <<'EOF'
+          #!/bin/bash
+          export LD_PRELOAD=/opt/hostedtoolcache/Python/3.12.15/x64/lib/libpython3.12.so.1.0
+          exec /opt/punkst-venv/bin/python "$@"
+          EOF
+          chmod +x /opt/punkst-venv/bin/python-preload
+          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python-preload" >> "$GITHUB_ENV"
           # rcmdcheck runs R CMD check in a sanitized subprocess that drops
           # arbitrary inherited env vars, so GITHUB_ENV alone isn't enough;
           # ~/.Renviron is read by R itself at startup and survives that.
-          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> ~/.Renviron
+          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python-preload" >> ~/.Renviron
 
       # Prebuilt Linux binary from the upstream punkst releases; avoids a
       # from-source C++ build (cmake/TBB/etc.) just to run CI. The baseline
@@ -86,24 +103,6 @@ jobs:
             any::rcmdcheck
             bioc::BiocCheck
           needs: check
-
-      # setup-r-dependencies apt-installs BiocCheck's system libraries,
-      # which pulls in Ubuntu's own (older) libpython3.12 package as a
-      # transitive dependency and keeps re-exporting its own
-      # LD_LIBRARY_PATH to $GITHUB_ENV with /usr/lib/x86_64-linux-gnu
-      # ahead of anything prepended earlier -- including check-r-package's
-      # own internal setup step, which runs after this one and re-wins the
-      # ordering race again. Since the venv python's extension modules
-      # resolve libpython3.12.so.1.0 via DT_RUNPATH (which LD_LIBRARY_PATH
-      # overrides), that shadows the toolcache's own libpython with one
-      # missing a CPython-internal symbol ctypes needs, breaking every
-      # import that touches ctypes (pandas -> dask -> spatialdata).
-      # LD_PRELOAD sidesteps the ordering race entirely: it's loaded
-      # before normal dependency resolution runs, so its symbols are
-      # already satisfied regardless of what LD_LIBRARY_PATH ends up as.
-      - name: Keep the toolcache libpython ahead of any apt-installed one
-        run: echo "LD_PRELOAD=/opt/hostedtoolcache/Python/3.12.15/x64/lib/libpython3.12.so.1.0" >> "$GITHUB_ENV"
-        shell: bash
 
       - uses: r-lib/actions/check-r-package@v2
         with:

@@ -45,8 +45,17 @@ jobs:
           python -m venv /opt/punkst-venv
           /opt/punkst-venv/bin/pip install --upgrade pip
           /opt/punkst-venv/bin/pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
-          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+          # See R-CMD-check.yaml: setup-r-dependencies's apt installs shadow
+          # the toolcache's own libpython via LD_LIBRARY_PATH, missing a
+          # symbol ctypes needs. LD_PRELOAD fixes it, but scoped to just the
+          # python exec via a wrapper so it doesn't leak into quarto/punkst.
+          cat > /opt/punkst-venv/bin/python-preload <<'EOF'
+          #!/bin/bash
+          export LD_PRELOAD=/opt/hostedtoolcache/Python/3.12.15/x64/lib/libpython3.12.so.1.0
+          exec /opt/punkst-venv/bin/python "$@"
+          EOF
+          chmod +x /opt/punkst-venv/bin/python-preload
+          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python-preload" >> "$GITHUB_ENV"
 
       - name: Install punkst binary
         run: |
