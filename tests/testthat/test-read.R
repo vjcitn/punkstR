@@ -42,7 +42,11 @@ test_that("match_xy matches on centres and rejects duplicate references", {
 
 test_that("sdata_info summarises a synthetic store", {
     py <- Sys.getenv("PUNKST_PYTHON")
+    message("DIAG PUNKST_PYTHON=", py, " exists=", file.exists(py))
     skip_if(!nzchar(py) || !file.exists(py), "PUNKST_PYTHON not set")
+    diag <- suppressWarnings(system2(py, c("-c", shQuote("import spatialdata")),
+                                      stdout = TRUE, stderr = TRUE))
+    message("DIAG import status=", attr(diag, "status"), " out=", paste(diag, collapse = " | "))
     skip_if(system2(py, c("-c", shQuote("import spatialdata")), stdout = FALSE,
                     stderr = FALSE) != 0, "spatialdata not importable")
     d <- tempfile(); dir.create(d)

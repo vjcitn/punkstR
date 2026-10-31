@@ -1,5 +1,7 @@
 python_with_sdata <- function() {
     chk <- check_punkst_setup(quiet = TRUE)
+    message("DIAG python_ok=", chk@python_ok, " python=", chk@python,
+            " notes=", paste(chk@notes, collapse = "; "))
     if (!chk@python_ok) NULL else chk@python
 }
 
