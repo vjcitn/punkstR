@@ -29,9 +29,9 @@ punkstModel(workdir = character(0), files = list(), params = list())
 - files:
 
   Named list of output file paths. Required names: `punkstTiles` `tsv`,
-  `index`, `features`; `punkstHex` `data`, `meta`; `punkstModel`
-  `model`, `state` (plus `results` and `pseudobulk` when fitted with
-  `transform = TRUE`).
+  `index`, `features`; `punkstHex` `data`, `meta`; `punkstModel` `model`
+  (plus `state` on punkst builds that write it, and `results` and
+  `pseudobulk` when fitted with `transform = TRUE`).
 
 - params:
 
@@ -50,7 +50,7 @@ tiles <- punkstTiles(workdir = tempdir(),
     files = list(tsv = "tiled.tsv", index = "tiled.index", features = "tiled.features.tsv"),
     params = list(tile_size = 500))
 tiles
-#> <punkstTiles> in /tmp/RtmprHvtcE
+#> <punkstTiles> in /tmp/RtmpAbIKEM
 #>   tsv       tiled.tsv
 #>   index     tiled.index
 #>   features  tiled.features.tsv

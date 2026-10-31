@@ -112,10 +112,7 @@ applies to all three punkst stages.</p>
 <span class="r-in"><span>        topic_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n_topics <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"pipeline dependencies not available: "</span>,</span></span>
 <span class="r-in"><span>                                <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> punkst binary : OK      /home/runner/work/punkstR/punkstR/punkst-0.1.2-linux-x86_64-glibc2.28/bin/punkst </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> python/sdata  : MISSING /opt/punkst-venv/bin/python </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> * /opt/punkst-venv/bin/python could not import spatialdata and zarr. Output:   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in &lt;module&gt; |     from _ctypes import Union, Structure, Array | ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> pipeline dependencies not available: Setup check failed; see above.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> pipeline dependencies not available: SpatialData store not found: /tmp/RtmpAbIKEM/demo.zarr</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

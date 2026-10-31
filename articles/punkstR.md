@@ -25,8 +25,7 @@ cfg <- check_punkst_setup()
 ```
 
     punkst binary : OK      /home/runner/work/punkstR/punkstR/punkst-0.1.2-linux-x86_64-glibc2.28/bin/punkst
-    python/sdata  : MISSING /opt/punkst-venv/bin/python
-    * /opt/punkst-venv/bin/python could not import spatialdata and zarr. Output:   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in <module> |     from _ctypes import Union, Structure, Array | ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
+    python/sdata  : OK      /opt/punkst-venv/bin/python-preload (spatialdata 0.8.0, zarr 3.4.2) 
 
 ``` r
 
@@ -52,8 +51,16 @@ dir.create(work)
 zarr <- sdata_demo(file.path(work, "demo.zarr"))
 info <- sdata_info(zarr)
 info$points$transcripts$rows
+```
+
+    [1] 60000
+
+``` r
+
 names(info$points$transcripts$transformations)
 ```
+
+    [1] "global"
 
 ## Run the pipeline
 
@@ -75,6 +82,23 @@ run2 <- run_punkst_pipeline(
 run2
 ```
 
+    <punkstRun>
+      source     : /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/demo.zarr
+      transcripts: /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/transcripts.tsv
+    <punkstTiles> in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
+      tsv       /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.tsv
+      index     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.index
+      coord_range /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.coord_range.tsv
+      features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
+    <punkstHex> in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
+      data      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.txt
+      meta      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.json
+      features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
+    <punkstModel> in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
+      model     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.model.tsv
+      results   /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.results.tsv
+      pseudobulk /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.pseudobulk.tsv
+
 The result is a `punkstRun` object whose properties (`run2@hex`,
 `run2@model`, …) are stage objects holding file paths and the parameters
 used.
@@ -85,9 +109,24 @@ used.
 
 m <- punkst_read_model(run2@model)          # genes x topics
 round(head(m[order(rownames(m)), ], 4))
+```
+
+          0   1
+    A0 1463 331
+    A1 1460 338
+    A2 1453 327
+    A3 1529 367
+
+``` r
+
 topics <- punkst_read_topics(run2@model)    # one row per hexagon
 head(topics, 3)
 ```
+
+           key  x        y      0      1
+    1 01564f61 60 103.9230 0.9989 0.0011
+    2 01954dd9 54 135.1000 0.9990 0.0010
+    3 01f011e7 96 145.4923 0.8374 0.1626
 
 Each topic should collect one family of genes:
 
@@ -98,6 +137,9 @@ frac_a <- vapply(as.data.frame(m), function(v)
 round(frac_a, 2)
 ```
 
+       0    1
+    0.86 0.18 
+
 and the topics should occupy different halves of the field:
 
 ``` r
@@ -107,6 +149,8 @@ top <- max.col(as.matrix(tp), "first")
 plot(topics$x, topics$y, col = c("#d95f02", "#1b9e77")[top], pch = 15, cex = 0.5,
      asp = 1, xlab = "x", ylab = "y", main = "Dominant topic per hexagon")
 ```
+
+![](punkstR_files/figure-html/map-1.png)
 
 ## Try other settings and compare
 
@@ -124,8 +168,18 @@ run3 <- run_punkst_pipeline(
     topic_model = list(n_topics = 3, n_epochs = 5, min_count_train = 5))
 cmp <- punkst_compare_runs(run2, run3)
 cmp$pairs
+```
+
+      topic_a topic_b    cosine
+    1       0       2 0.9983933
+    2       1       1 0.9965134
+
+``` r
+
 cmp$agreement
 ```
+
+    [1] 0.9971429
 
 [`punkst_compare_runs()`](https://vjcitn.github.io/punkstR/reference/punkst_compare_runs.md)
 pairs each topic of one fit with its most similar topic of the other
@@ -148,6 +202,10 @@ sdata_writeback(run3, out = side)
 runs <- sdata_runs(side)
 runs[, c("run", "n_hexagons", "n_topics", "hex_size")]
 ```
+
+            run n_hexagons n_topics hex_size
+    1 hex_12_k2        350        2 6.928203
+    2 hex_12_k3        350        3 6.928203
 
 Both runs now live side by side in one store, ready to be read with
 `spatialdata`, `anndata` or other SpatialData tooling.

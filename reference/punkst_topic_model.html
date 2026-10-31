@@ -289,9 +289,10 @@ uses the system temporary directory.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>punkstModel</code> stage object. <code>files</code> holds <code>model</code> (features x
-topics) and <code>state</code> always, plus <code>results</code> (per-unit topic proportions)
-and <code>pseudobulk</code> when the transform ran, and <code>unit_stats</code> when
-<code>residuals</code> is on.</p>
+topics), <code>state</code> when the punkst build writes it (the current v0.1.2
+release does not), <code>results</code> (per-unit topic proportions) and
+<code>pseudobulk</code> when the transform ran, and <code>unit_stats</code> when <code>residuals</code>
+is on.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -308,8 +309,8 @@ Note also that punkst does not sort topics unless <code>sort_topics = TRUE</code
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu">punkst_topic_model</span><span class="op">(</span><span class="va">hex</span>, n_topics <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"punkst not available: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> [punkstR] topic_model_file19c64d089c2b.k2: running</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> punkst not available: punkst topic-model failed with exit status 134. Last log lines (/tmp/RtmprHvtcE/topic_model_file19c64d089c2b.k2.log):</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> [punkstR] topic_model_file1a35fcc0a78.k2: running</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> punkst not available: punkst topic-model failed with exit status 134. Last log lines (/tmp/RtmpAbIKEM/topic_model_file1a35fcc0a78.k2.log):</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     --topk-only [-1], --in-dge-dir, --in-barcodes, --in-features, --in-matrix,</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     --dataset-id, --features, --min-count-per-feature [1], --default-weight [-1],</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     --icol-weight [-1], --include-feature-regex, --exclude-feature-regex,</span>
@@ -323,7 +324,7 @@ Note also that punkst does not sort topics unless <code>sort_topics = TRUE</code
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     --bg-fraction-prior-b0 [8], --warm-start-epochs [0.5]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> terminate called after throwing an instance of 'std::runtime_error'</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   what():  Error opening metadata file /tmp/RtmprHvtcE/file19c6170f60b8</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   what():  Error opening metadata file /tmp/RtmpAbIKEM/file1a355382edee</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Aborted (core dumped)</span>
 </code></pre></div>
     </div>

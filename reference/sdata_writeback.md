@@ -123,22 +123,20 @@ model <- punkstModel(workdir = tempdir(),
     params = list())
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/RtmprHvtcE/demo.zarr' already exists
+#> Warning: '/tmp/RtmpAbIKEM/demo.zarr' already exists
 tryCatch(
     sdata_writeback(model, hex = hex, sdata = store),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: punkst_to_sdata.py write failed with exit status 1. Last log lines (/tmp/RtmprHvtcE/writeback19c674c50770.log):
+#> spatialdata not available: punkst_to_sdata.py write failed with exit status 1. Last log lines (/tmp/RtmpAbIKEM/writeback1a35706357cc.log):
 #> Traceback (most recent call last):
-#>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 17, in <module>
-#>     import pandas as pd
-#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/__init__.py", line 44, in <module>
-#>     import pandas.core.config_init  # pyright: ignore[reportUnusedImport] # noqa: F401
-#>     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/core/config_init.py", line 31, in <module>
-#>     from pandas.errors import Pandas4Warning
-#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/errors/__init__.py", line 8, in <module>
-#>     import ctypes
-#>   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in <module>
-#>     from _ctypes import Union, Structure, Array
-#> ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
+#>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 202, in <module>
+#>     r = write_run(a.target, a.run, a.hex, a.hex_json, a.results, a.model, params,
+#>         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 66, in write_run
+#>     meta, genes, hx, hy, counts = read_hex(hex_txt, hex_json)
+#>                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 27, in read_hex
+#>     with open(meta_path) as fh:
+#>          ^^^^^^^^^^^^^^^
+#> FileNotFoundError: [Errno 2] No such file or directory: '/tmp/RtmpAbIKEM/file1a354d15be10'
 ```

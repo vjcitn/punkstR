@@ -74,8 +74,7 @@
 <span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_punkst_setup.html">check_punkst_setup</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>punkst binary : OK      /home/runner/work/punkstR/punkstR/punkst-0.1.2-linux-x86_64-glibc2.28/bin/punkst
-python/sdata  : MISSING /opt/punkst-venv/bin/python
-* /opt/punkst-venv/bin/python could not import spatialdata and zarr. Output:   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in &lt;module&gt; |     from _ctypes import Union, Structure, Array | ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString</code></pre>
+python/sdata  : OK      /opt/punkst-venv/bin/python-preload (spatialdata 0.8.0, zarr 3.4.2) </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">can_run</span> <span class="op">&lt;-</span> <span class="va">cfg</span><span class="op">@</span><span class="va">bin_ok</span> <span class="op">&amp;&amp;</span> <span class="va">cfg</span><span class="op">@</span><span class="va">python_ok</span></span>
@@ -91,14 +90,21 @@ python/sdata  : MISSING /opt/punkst-venv/bin/python
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">work</span><span class="op">)</span></span>
 <span><span class="va">zarr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sdata_demo.html">sdata_demo</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">work</span>, <span class="st">"demo.zarr"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sdata_info.html">sdata_info</a></span><span class="op">(</span><span class="va">zarr</span><span class="op">)</span></span>
-<span><span class="va">info</span><span class="op">$</span><span class="va">points</span><span class="op">$</span><span class="va">transcripts</span><span class="op">$</span><span class="va">rows</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info</span><span class="op">$</span><span class="va">points</span><span class="op">$</span><span class="va">transcripts</span><span class="op">$</span><span class="va">transformations</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">info</span><span class="op">$</span><span class="va">points</span><span class="op">$</span><span class="va">transcripts</span><span class="op">$</span><span class="va">rows</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 60000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info</span><span class="op">$</span><span class="va">points</span><span class="op">$</span><span class="va">transcripts</span><span class="op">$</span><span class="va">transformations</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "global"</code></pre>
+</div>
 </div>
 </section><section class="level2"><h2 id="run-the-pipeline">Run the pipeline<a class="anchor" aria-label="anchor" href="#run-the-pipeline"></a>
 </h2>
 <p><code><a href="../reference/run_punkst_pipeline.html">run_punkst_pipeline()</a></code> exports the transcripts, tiles them (<code>pts2tiles</code>), aggregates them into hexagons (<code>tiles2hex</code>) and fits a topic model (<code>topic-model</code>). Options for each stage go in a named list; everything else takes punkst’s defaults. Stages whose inputs and parameters have not changed are skipped on re-runs.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_punkst_pipeline.html">run_punkst_pipeline</a></span><span class="op">(</span></span>
 <span>    <span class="va">zarr</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">work</span>, <span class="st">"out"</span><span class="op">)</span>, threads <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>    export <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>coordinate_system <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
@@ -106,37 +112,79 @@ python/sdata  : MISSING /opt/punkst-venv/bin/python
 <span>    tiles2hex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>min_count <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    topic_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n_topics <span class="op">=</span> <span class="fl">2</span>, n_epochs <span class="op">=</span> <span class="fl">5</span>, min_count_train <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">run2</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;punkstRun&gt;
+  source     : /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/demo.zarr
+  transcripts: /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/transcripts.tsv
+&lt;punkstTiles&gt; in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
+  tsv       /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.tsv
+  index     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.index
+  coord_range /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.coord_range.tsv
+  features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
+&lt;punkstHex&gt; in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
+  data      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.txt
+  meta      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.json
+  features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
+&lt;punkstModel&gt; in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
+  model     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.model.tsv
+  results   /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.results.tsv
+  pseudobulk /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.pseudobulk.tsv</code></pre>
+</div>
 </div>
 <p>The result is a <code>punkstRun</code> object whose properties (<code>run2@hex</code>, <code>run2@model</code>, …) are stage objects holding file paths and the parameters used.</p>
 </section><section class="level2"><h2 id="read-the-results">Read the results<a class="anchor" aria-label="anchor" href="#read-the-results"></a>
 </h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/punkst_read_model.html">punkst_read_model</a></span><span class="op">(</span><span class="va">run2</span><span class="op">@</span><span class="va">model</span><span class="op">)</span>          <span class="co"># genes x topics</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">m</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">topics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/punkst_read_topics.html">punkst_read_topics</a></span><span class="op">(</span><span class="va">run2</span><span class="op">@</span><span class="va">model</span><span class="op">)</span>    <span class="co"># one row per hexagon</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">m</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      0   1
+A0 1463 331
+A1 1460 338
+A2 1453 327
+A3 1529 367</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">topics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/punkst_read_topics.html">punkst_read_topics</a></span><span class="op">(</span><span class="va">run2</span><span class="op">@</span><span class="va">model</span><span class="op">)</span>    <span class="co"># one row per hexagon</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">topics</span>, <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       key  x        y      0      1
+1 01564f61 60 103.9230 0.9989 0.0011
+2 01954dd9 54 135.1000 0.9990 0.0010
+3 01f011e7 96 145.4923 0.8374 0.1626</code></pre>
+</div>
 </div>
 <p>Each topic should collect one family of genes:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">frac_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">v</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">startsWith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>, <span class="st">"A"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">frac_a</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   0    1
+0.86 0.18 </code></pre>
+</div>
 </div>
 <p>and the topics should occupy different halves of the field:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tp</span> <span class="op">&lt;-</span> <span class="va">topics</span><span class="op">[</span>, <span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">top</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/maxCol.html" class="external-link">max.col</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">tp</span><span class="op">)</span>, <span class="st">"first"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">topics</span><span class="op">$</span><span class="va">x</span>, <span class="va">topics</span><span class="op">$</span><span class="va">y</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#d95f02"</span>, <span class="st">"#1b9e77"</span><span class="op">)</span><span class="op">[</span><span class="va">top</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">15</span>, cex <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>     asp <span class="op">=</span> <span class="fl">1</span>, xlab <span class="op">=</span> <span class="st">"x"</span>, ylab <span class="op">=</span> <span class="st">"y"</span>, main <span class="op">=</span> <span class="st">"Dominant topic per hexagon"</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure><p><img src="punkstR_files/figure-html/map-1.png" width="700"></p>
+</figure>
+</div>
+</div>
 </div>
 </section><section class="level2"><h2 id="try-other-settings-and-compare">Try other settings and compare<a class="anchor" aria-label="anchor" href="#try-other-settings-and-compare"></a>
 </h2>
 <p>Different tuning choices go in the same work directory; output names carry the hexagon spacing and topic count, so runs do not overwrite each other.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_punkst_pipeline.html">run_punkst_pipeline</a></span><span class="op">(</span></span>
 <span>    <span class="va">zarr</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">work</span>, <span class="st">"out"</span><span class="op">)</span>, threads <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>    export <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>coordinate_system <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
@@ -144,20 +192,34 @@ python/sdata  : MISSING /opt/punkst-venv/bin/python
 <span>    tiles2hex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>min_count <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    topic_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n_topics <span class="op">=</span> <span class="fl">3</span>, n_epochs <span class="op">=</span> <span class="fl">5</span>, min_count_train <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/punkst_compare_runs.html">punkst_compare_runs</a></span><span class="op">(</span><span class="va">run2</span>, <span class="va">run3</span><span class="op">)</span></span>
-<span><span class="va">cmp</span><span class="op">$</span><span class="va">pairs</span></span>
-<span><span class="va">cmp</span><span class="op">$</span><span class="va">agreement</span></span></code></pre></div>
+<span><span class="va">cmp</span><span class="op">$</span><span class="va">pairs</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  topic_a topic_b    cosine
+1       0       2 0.9983933
+2       1       1 0.9965134</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cmp</span><span class="op">$</span><span class="va">agreement</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9971429</code></pre>
+</div>
 </div>
 <p><code><a href="../reference/punkst_compare_runs.html">punkst_compare_runs()</a></code> pairs each topic of one fit with its most similar topic of the other (cosine similarity of gene loadings) and reports how often hexagons keep their pairing.</p>
 </section><section class="level2"><h2 id="write-results-back-into-a-spatialdata-store">Write results back into a SpatialData store<a class="anchor" aria-label="anchor" href="#write-results-back-into-a-spatialdata-store"></a>
 </h2>
 <p><code><a href="../reference/sdata_writeback.html">sdata_writeback()</a></code> adds a run to a store as a <code>shapes</code> element of hexagons and a <code>table</code> with counts, topic probabilities, gene loadings and the parameters that produced them. By default it writes a new sidecar store; use <code>in_place = TRUE</code> to add to the original.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">side</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">work</span>, <span class="st">"demo_punkst.zarr"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/sdata_writeback.html">sdata_writeback</a></span><span class="op">(</span><span class="va">run2</span>, out <span class="op">=</span> <span class="va">side</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/sdata_writeback.html">sdata_writeback</a></span><span class="op">(</span><span class="va">run3</span>, out <span class="op">=</span> <span class="va">side</span><span class="op">)</span></span>
 <span><span class="va">runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sdata_runs.html">sdata_runs</a></span><span class="op">(</span><span class="va">side</span><span class="op">)</span></span>
 <span><span class="va">runs</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"run"</span>, <span class="st">"n_hexagons"</span>, <span class="st">"n_topics"</span>, <span class="st">"hex_size"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        run n_hexagons n_topics hex_size
+1 hex_12_k2        350        2 6.928203
+2 hex_12_k3        350        3 6.928203</code></pre>
+</div>
 </div>
 <p>Both runs now live side by side in one store, ready to be read with <code>spatialdata</code>, <code>anndata</code> or other SpatialData tooling.</p>
 </section><script id="quarto-html-after-body" type="application/javascript">

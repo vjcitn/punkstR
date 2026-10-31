@@ -236,10 +236,10 @@ punkst_topic_model(
 
 ## Value
 
-A `punkstModel` stage object. `files` holds `model` (features x topics)
-and `state` always, plus `results` (per-unit topic proportions) and
-`pseudobulk` when the transform ran, and `unit_stats` when `residuals`
-is on.
+A `punkstModel` stage object. `files` holds `model` (features x topics),
+`state` when the punkst build writes it (the current v0.1.2 release does
+not), `results` (per-unit topic proportions) and `pseudobulk` when the
+transform ran, and `unit_stats` when `residuals` is on.
 
 ## Details
 
@@ -257,8 +257,8 @@ hex <- punkstHex(workdir = tempdir(),
 tryCatch(
     punkst_topic_model(hex, n_topics = 2L),
     error = function(e) message("punkst not available: ", conditionMessage(e)))
-#> [punkstR] topic_model_file19c64d089c2b.k2: running
-#> punkst not available: punkst topic-model failed with exit status 134. Last log lines (/tmp/RtmprHvtcE/topic_model_file19c64d089c2b.k2.log):
+#> [punkstR] topic_model_file1a35fcc0a78.k2: running
+#> punkst not available: punkst topic-model failed with exit status 134. Last log lines (/tmp/RtmpAbIKEM/topic_model_file1a35fcc0a78.k2.log):
 #>     --topk-only [-1], --in-dge-dir, --in-barcodes, --in-features, --in-matrix,
 #>     --dataset-id, --features, --min-count-per-feature [1], --default-weight [-1],
 #>     --icol-weight [-1], --include-feature-regex, --exclude-feature-regex,
@@ -272,6 +272,6 @@ tryCatch(
 #>     --bg-fraction-prior-b0 [8], --warm-start-epochs [0.5]
 #> 
 #> terminate called after throwing an instance of 'std::runtime_error'
-#>   what():  Error opening metadata file /tmp/RtmprHvtcE/file19c6170f60b8
+#>   what():  Error opening metadata file /tmp/RtmpAbIKEM/file1a355382edee
 #> Aborted (core dumped)
 ```

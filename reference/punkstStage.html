@@ -66,8 +66,8 @@ abstract; use the subclasses <code>punkstTiles</code>, <code>punkstHex</code> an
 <dt id="arg-files">files<a class="anchor" aria-label="anchor" href="#arg-files"></a></dt>
 <dd><p>Named list of output file paths. Required names: <code>punkstTiles</code>
 <code>tsv</code>, <code>index</code>, <code>features</code>; <code>punkstHex</code> <code>data</code>, <code>meta</code>; <code>punkstModel</code>
-<code>model</code>, <code>state</code> (plus <code>results</code> and <code>pseudobulk</code> when fitted with
-<code>transform = TRUE</code>).</p></dd>
+<code>model</code> (plus <code>state</code> on punkst builds that write it, and <code>results</code> and
+<code>pseudobulk</code> when fitted with <code>transform = TRUE</code>).</p></dd>
 
 
 <dt id="arg-params">params<a class="anchor" aria-label="anchor" href="#arg-params"></a></dt>
@@ -87,7 +87,7 @@ also drive the skip-if-up-to-date manifest and are recorded by
 <span class="r-in"><span>    files <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tsv <span class="op">=</span> <span class="st">"tiled.tsv"</span>, index <span class="op">=</span> <span class="st">"tiled.index"</span>, features <span class="op">=</span> <span class="st">"tiled.features.tsv"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tile_size <span class="op">=</span> <span class="fl">500</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">tiles</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;punkstTiles&gt; in /tmp/RtmprHvtcE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;punkstTiles&gt; in /tmp/RtmpAbIKEM</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   tsv       tiled.tsv</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   index     tiled.index</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   features  tiled.features.tsv</span>

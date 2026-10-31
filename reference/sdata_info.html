@@ -87,10 +87,60 @@ resolution), <code>shapes</code>, <code>tables</code> and <code>spatialdata_vers
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">store</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"demo.zarr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">store</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'/tmp/RtmprHvtcE/demo.zarr' already exists</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'/tmp/RtmpAbIKEM/demo.zarr' already exists</span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="fu">sdata_info</span><span class="op">(</span><span class="va">store</span><span class="op">)</span>, error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $spatialdata_version</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "0.8.0"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$columns[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "x"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$columns[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "y"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$columns[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gene"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$attrs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$attrs$feature_key</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gene"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$rows</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$max_x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 199.442</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$max_y</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 199.4021</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$transformations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$transformations$global</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$transformations$global$type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Identity"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $points$transcripts$transformations$global$repr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Identity "</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $images</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> named list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $shapes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $tables</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -85,8 +85,5 @@ tryCatch(
         topic_model = list(n_topics = 2L)),
     error = function(e) message("pipeline dependencies not available: ",
                                 conditionMessage(e)))
-#> punkst binary : OK      /home/runner/work/punkstR/punkstR/punkst-0.1.2-linux-x86_64-glibc2.28/bin/punkst 
-#> python/sdata  : MISSING /opt/punkst-venv/bin/python 
-#> * /opt/punkst-venv/bin/python could not import spatialdata and zarr. Output:   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in <module> |     from _ctypes import Union, Structure, Array | ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
-#> pipeline dependencies not available: Setup check failed; see above.
+#> pipeline dependencies not available: SpatialData store not found: /tmp/RtmpAbIKEM/demo.zarr
 ```

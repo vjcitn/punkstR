@@ -48,8 +48,58 @@ A list with `points` (per element: `columns`, `attrs`, `rows`, `max_x`,
 ``` r
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/RtmprHvtcE/demo.zarr' already exists
+#> Warning: '/tmp/RtmpAbIKEM/demo.zarr' already exists
 res <- tryCatch(sdata_info(store), error = function(e) NULL)
 res
-#> NULL
+#> $spatialdata_version
+#> [1] "0.8.0"
+#> 
+#> $points
+#> $points$transcripts
+#> $points$transcripts$columns
+#> $points$transcripts$columns[[1]]
+#> [1] "x"
+#> 
+#> $points$transcripts$columns[[2]]
+#> [1] "y"
+#> 
+#> $points$transcripts$columns[[3]]
+#> [1] "gene"
+#> 
+#> 
+#> $points$transcripts$attrs
+#> $points$transcripts$attrs$feature_key
+#> [1] "gene"
+#> 
+#> 
+#> $points$transcripts$rows
+#> [1] 200
+#> 
+#> $points$transcripts$max_x
+#> [1] 199.442
+#> 
+#> $points$transcripts$max_y
+#> [1] 199.4021
+#> 
+#> $points$transcripts$transformations
+#> $points$transcripts$transformations$global
+#> $points$transcripts$transformations$global$type
+#> [1] "Identity"
+#> 
+#> $points$transcripts$transformations$global$repr
+#> [1] "Identity "
+#> 
+#> 
+#> 
+#> 
+#> 
+#> $images
+#> named list()
+#> 
+#> $shapes
+#> list()
+#> 
+#> $tables
+#> list()
+#> 
 ```
