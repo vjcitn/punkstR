@@ -19,6 +19,14 @@ jobs:
         with:
           use-public-rspm: true
 
+      # bioc.r-universe.dev serves prebuilt Linux binaries for Bioconductor
+      # packages (BiocCheck's dependency tree is large), so installs don't
+      # have to compile everything from source on every run.
+      - name: Add Bioconductor r-universe binary repo
+        run: |
+          echo 'options(repos = c(getOption("repos"), BiocRuniverse = "https://bioc.r-universe.dev"))' >> ~/.Rprofile
+        shell: bash
+
       - uses: quarto-dev/quarto-actions/setup@v2
 
       - uses: actions/setup-python@v5
