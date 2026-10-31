@@ -47,7 +47,10 @@ jobs:
             "https://github.com/Yichen-Si/punkst/releases/download/${tag}/${asset}"
           tar -xzf punkst.tar.gz
           dir="${asset%.tar.gz}"
-          "./${dir}/bin/env-check"
+          # env-check runs punkst with no subcommand, which prints the command
+          # list and exits 1 by design -- that's the smoke test passing, not a
+          # failure, so don't let it trip set -e.
+          "./${dir}/bin/env-check" || true
           echo "${PWD}/${dir}/bin" >> "$GITHUB_PATH"
           echo "PUNKST=${PWD}/${dir}/bin/punkst" >> "$GITHUB_ENV"
 
