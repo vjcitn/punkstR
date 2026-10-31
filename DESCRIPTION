@@ -8,13 +8,13 @@ Description: Checks for the required executables and files, then runs the
     SpatialData (zarr) point elements to the transcript format 'punkst'
     expects.
 License: MIT + file LICENSE
-URL: https://github.com/vjcitn/punkstR
+URL: https://github.com/vjcitn/punkstR, https://vjcitn.github.io/punkstR/
 BugReports: https://github.com/vjcitn/punkstR/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 biocViews: Spatial, Transcriptomics, SingleCell, Software
 Imports: jsonlite, Matrix, S7, utils
-Suggests: knitr, quarto, testthat (>= 3.0.0)
+Suggests: knitr, quarto, testthat (>= 3.0.0), pkgdown
 VignetteBuilder: quarto
 SystemRequirements: Quarto command line tools (https://quarto.org), 'punkst' (https://github.com/Yichen-Si/punkst)
 Config/testthat/edition: 3

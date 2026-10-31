@@ -1,0 +1,76 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+name: pkgdown
+
+jobs:
+  pkgdown:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Add Bioconductor r-universe binary repo
+        run: |
+          echo 'options(repos = c(getOption("repos"), BiocRuniverse = "https://bioc.r-universe.dev"))' >> ~/.Rprofile
+        shell: bash
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Same as R-CMD-check.yaml: the vignette's Python chunks run for
+      # real when the site is built, so this needs a working interpreter
+      # with spatialdata (no reticulate -- punkstR only ever shells out).
+      - name: Install Python dependencies (spatialdata and friends)
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
+          echo "PUNKST_PYTHON=$(which python)" >> "$GITHUB_ENV"
+
+      - name: Install punkst binary
+        run: |
+          set -euo pipefail
+          tag="v0.1.2"
+          asset="punkst-0.1.2-linux-x86_64-glibc2.28.tar.gz"
+          curl -fsSL -o punkst.tar.gz \
+            "https://github.com/Yichen-Si/punkst/releases/download/${tag}/${asset}"
+          tar -xzf punkst.tar.gz
+          dir="${asset%.tar.gz}"
+          "./${dir}/bin/env-check" || true
+          echo "${PWD}/${dir}/bin" >> "$GITHUB_PATH"
+          echo "PUNKST=${PWD}/${dir}/bin/punkst" >> "$GITHUB_ENV"
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown, local::.
+          needs: website
+
+      - name: Build site
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
+
+      - name: Deploy to GitHub pages
+        if: github.event_name != 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          clean: false
+          branch: gh-pages
+          folder: docs

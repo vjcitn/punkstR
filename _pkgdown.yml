@@ -1,0 +1,7 @@
+url: https://vjcitn.github.io/punkstR/
+
+template:
+  bootstrap: 5
+
+development:
+  mode: auto
