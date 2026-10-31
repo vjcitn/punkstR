@@ -257,8 +257,8 @@ hex <- punkstHex(workdir = tempdir(),
 tryCatch(
     punkst_topic_model(hex, n_topics = 2L),
     error = function(e) message("punkst not available: ", conditionMessage(e)))
-#> [punkstR] topic_model_file19ea71a6b4d.k2: running
-#> punkst not available: punkst topic-model failed with exit status 134. Last log lines (/tmp/RtmpuGPHhL/topic_model_file19ea71a6b4d.k2.log):
+#> [punkstR] topic_model_file1c4213c183eb.k2: running
+#> punkst not available: punkst topic-model failed with exit status 134. Last log lines (/tmp/RtmpQPAIGS/topic_model_file1c4213c183eb.k2.log):
 #>     --topk-only [-1], --in-dge-dir, --in-barcodes, --in-features, --in-matrix,
 #>     --dataset-id, --features, --min-count-per-feature [1], --default-weight [-1],
 #>     --icol-weight [-1], --include-feature-regex, --exclude-feature-regex,
@@ -272,6 +272,6 @@ tryCatch(
 #>     --bg-fraction-prior-b0 [8], --warm-start-epochs [0.5]
 #> 
 #> terminate called after throwing an instance of 'std::runtime_error'
-#>   what():  Error opening metadata file /tmp/RtmpuGPHhL/file19ea34df8528
+#>   what():  Error opening metadata file /tmp/RtmpQPAIGS/file1c42770c9f28
 #> Aborted (core dumped)
 ```
