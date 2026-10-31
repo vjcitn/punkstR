@@ -84,7 +84,7 @@ as punkst expects.
 # Requires a Python interpreter with spatialdata; skipped otherwise.
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/RtmpAbIKEM/demo.zarr' already exists
+#> Warning: '/tmp/RtmpyaloTj/demo.zarr' already exists
 tryCatch(
     sdata_export(store, tempfile(fileext = ".tsv")),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))

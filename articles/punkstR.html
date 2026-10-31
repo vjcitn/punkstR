@@ -114,21 +114,21 @@ python/sdata  : OK      /opt/punkst-venv/bin/python-preload (spatialdata 0.8.0, 
 <span><span class="va">run2</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;punkstRun&gt;
-  source     : /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/demo.zarr
-  transcripts: /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/transcripts.tsv
-&lt;punkstTiles&gt; in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
-  tsv       /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.tsv
-  index     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.index
-  coord_range /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.coord_range.tsv
-  features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
-&lt;punkstHex&gt; in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
-  data      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.txt
-  meta      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.json
-  features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
-&lt;punkstModel&gt; in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
-  model     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.model.tsv
-  results   /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.results.tsv
-  pseudobulk /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.pseudobulk.tsv</code></pre>
+  source     : /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/demo.zarr
+  transcripts: /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/transcripts.tsv
+&lt;punkstTiles&gt; in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
+  tsv       /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.tsv
+  index     /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.index
+  coord_range /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.coord_range.tsv
+  features  /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.features.tsv
+&lt;punkstHex&gt; in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
+  data      /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.txt
+  meta      /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.json
+  features  /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.features.tsv
+&lt;punkstModel&gt; in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
+  model     /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.model.tsv
+  results   /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.results.tsv
+  pseudobulk /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.pseudobulk.tsv</code></pre>
 </div>
 </div>
 <p>The result is a <code>punkstRun</code> object whose properties (<code>run2@hex</code>, <code>run2@model</code>, …) are stage objects holding file paths and the parameters used.</p>
@@ -142,8 +142,8 @@ python/sdata  : OK      /opt/punkst-venv/bin/python-preload (spatialdata 0.8.0, 
 <pre><code>      0   1
 A0 1463 331
 A1 1460 338
-A2 1453 327
-A3 1529 367</code></pre>
+A2 1452 328
+A3 1529 368</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">topics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/punkst_read_topics.html">punkst_read_topics</a></span><span class="op">(</span><span class="va">run2</span><span class="op">@</span><span class="va">model</span><span class="op">)</span>    <span class="co"># one row per hexagon</span></span>
@@ -195,8 +195,8 @@ A3 1529 367</code></pre>
 <span><span class="va">cmp</span><span class="op">$</span><span class="va">pairs</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  topic_a topic_b    cosine
-1       0       2 0.9983933
-2       1       1 0.9965134</code></pre>
+1       0       2 0.9983926
+2       1       1 0.9965140</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cmp</span><span class="op">$</span><span class="va">agreement</span></span></code></pre></div>

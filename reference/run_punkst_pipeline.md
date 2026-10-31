@@ -85,5 +85,5 @@ tryCatch(
         topic_model = list(n_topics = 2L)),
     error = function(e) message("pipeline dependencies not available: ",
                                 conditionMessage(e)))
-#> pipeline dependencies not available: SpatialData store not found: /tmp/RtmpAbIKEM/demo.zarr
+#> pipeline dependencies not available: SpatialData store not found: /tmp/RtmpyaloTj/demo.zarr
 ```

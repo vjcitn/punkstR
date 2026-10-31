@@ -83,21 +83,21 @@ run2
 ```
 
     <punkstRun>
-      source     : /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/demo.zarr
-      transcripts: /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/transcripts.tsv
-    <punkstTiles> in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
-      tsv       /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.tsv
-      index     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.index
-      coord_range /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.coord_range.tsv
-      features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
-    <punkstHex> in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
-      data      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.txt
-      meta      /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.json
-      features  /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/tiled.features.tsv
-    <punkstModel> in /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out
-      model     /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.model.tsv
-      results   /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.results.tsv
-      pseudobulk /tmp/RtmpAa8WCR/punkstR_demo_1cbd3e9f5373/out/hex_12.k2.pseudobulk.tsv
+      source     : /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/demo.zarr
+      transcripts: /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/transcripts.tsv
+    <punkstTiles> in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
+      tsv       /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.tsv
+      index     /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.index
+      coord_range /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.coord_range.tsv
+      features  /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.features.tsv
+    <punkstHex> in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
+      data      /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.txt
+      meta      /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.json
+      features  /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.features.tsv
+    <punkstModel> in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
+      model     /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.model.tsv
+      results   /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.results.tsv
+      pseudobulk /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.pseudobulk.tsv
 
 The result is a `punkstRun` object whose properties (`run2@hex`,
 `run2@model`, …) are stage objects holding file paths and the parameters
@@ -114,8 +114,8 @@ round(head(m[order(rownames(m)), ], 4))
           0   1
     A0 1463 331
     A1 1460 338
-    A2 1453 327
-    A3 1529 367
+    A2 1452 328
+    A3 1529 368
 
 ``` r
 
@@ -171,8 +171,8 @@ cmp$pairs
 ```
 
       topic_a topic_b    cosine
-    1       0       2 0.9983933
-    2       1       1 0.9965134
+    1       0       2 0.9983926
+    2       1       1 0.9965140
 
 ``` r
 

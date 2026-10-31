@@ -48,13 +48,13 @@ run
 #> <punkstRun>
 #>   source     : demo.zarr 
 #>   transcripts: transcripts.tsv 
-#> <punkstTiles> in /tmp/RtmpAbIKEM
+#> <punkstTiles> in /tmp/RtmpyaloTj
 #>   tsv       t.tsv
 #>   index     t.index
 #>   features  t.features.tsv
-#> <punkstHex> in /tmp/RtmpAbIKEM
+#> <punkstHex> in /tmp/RtmpyaloTj
 #>   data      hex.txt
 #>   meta      hex.json
-#> <punkstModel> in /tmp/RtmpAbIKEM
+#> <punkstModel> in /tmp/RtmpyaloTj
 #>   model     m.model.tsv
 ```
