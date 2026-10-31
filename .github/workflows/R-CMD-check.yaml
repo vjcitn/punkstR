@@ -88,18 +88,21 @@ jobs:
           needs: check
 
       # setup-r-dependencies apt-installs BiocCheck's system libraries,
-      # which pulls in Ubuntu's own libpython3.12 package as a transitive
-      # dependency and re-exports its own LD_LIBRARY_PATH to $GITHUB_ENV
-      # (observed: /usr/lib/x86_64-linux-gnu ends up ahead of the
-      # toolcache's own lib dir). Since the venv python's extension
-      # modules resolve libpython3.12.so.1.0 via DT_RUNPATH (which
-      # LD_LIBRARY_PATH overrides), that shadows it with an older build
+      # which pulls in Ubuntu's own (older) libpython3.12 package as a
+      # transitive dependency and keeps re-exporting its own
+      # LD_LIBRARY_PATH to $GITHUB_ENV with /usr/lib/x86_64-linux-gnu
+      # ahead of anything prepended earlier -- including check-r-package's
+      # own internal setup step, which runs after this one and re-wins the
+      # ordering race again. Since the venv python's extension modules
+      # resolve libpython3.12.so.1.0 via DT_RUNPATH (which LD_LIBRARY_PATH
+      # overrides), that shadows the toolcache's own libpython with one
       # missing a CPython-internal symbol ctypes needs, breaking every
-      # import that touches ctypes (pandas -> dask -> spatialdata). This
-      # step must run after setup-r-dependencies, so its own prepend is
-      # the last word by the time check-r-package starts.
+      # import that touches ctypes (pandas -> dask -> spatialdata).
+      # LD_PRELOAD sidesteps the ordering race entirely: it's loaded
+      # before normal dependency resolution runs, so its symbols are
+      # already satisfied regardless of what LD_LIBRARY_PATH ends up as.
       - name: Keep the toolcache libpython ahead of any apt-installed one
-        run: echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+        run: echo "LD_PRELOAD=/opt/hostedtoolcache/Python/3.12.15/x64/lib/libpython3.12.so.1.0" >> "$GITHUB_ENV"
         shell: bash
 
       - uses: r-lib/actions/check-r-package@v2
