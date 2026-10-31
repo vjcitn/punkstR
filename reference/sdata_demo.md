@@ -68,10 +68,19 @@ sdata_demo(
 tryCatch(
     sdata_demo(file.path(tempdir(), "demo.zarr"), n_points = 200L),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: make_synthetic_sdata.py failed with exit status 1. Last log lines (/tmp/Rtmp9cP0D1/sdata_demo1aa4cd65ae9.log):
+#> spatialdata not available: make_synthetic_sdata.py failed with exit status 1. Last log lines (/tmp/RtmpttWHGi/sdata_demo1a7070a28bf7.log):
 #> Traceback (most recent call last):
 #>   File "<string>", line 1, in <module>
-#>   File "/home/runner/work/_temp/Library/punkstR/python/make_synthetic_sdata.py", line 4, in <module>
-#>     import numpy as np
-#> ModuleNotFoundError: No module named 'numpy'
+#>   File "/home/runner/work/_temp/Library/punkstR/python/make_synthetic_sdata.py", line 5, in <module>
+#>     import pandas as pd
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/__init__.py", line 44, in <module>
+#>     import pandas.core.config_init  # pyright: ignore[reportUnusedImport] # noqa: F401
+#>     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/core/config_init.py", line 31, in <module>
+#>     from pandas.errors import Pandas4Warning
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/errors/__init__.py", line 8, in <module>
+#>     import ctypes
+#>   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in <module>
+#>     from _ctypes import Union, Structure, Array
+#> ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
 ```

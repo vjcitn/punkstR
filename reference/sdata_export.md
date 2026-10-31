@@ -87,9 +87,18 @@ dir.create(store)
 tryCatch(
     sdata_export(store, tempfile(fileext = ".tsv")),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: spatialdata_to_punkst.py failed with exit status 1. Last log lines (/tmp/Rtmp9cP0D1/file1aa4be6fe93.tsv.export.log):
+#> spatialdata not available: spatialdata_to_punkst.py failed with exit status 1. Last log lines (/tmp/RtmpttWHGi/file1a70155d385a.tsv.export.log):
 #> Traceback (most recent call last):
 #>   File "/home/runner/work/_temp/Library/punkstR/python/spatialdata_to_punkst.py", line 23, in <module>
 #>     import pandas as pd
-#> ModuleNotFoundError: No module named 'pandas'
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/__init__.py", line 44, in <module>
+#>     import pandas.core.config_init  # pyright: ignore[reportUnusedImport] # noqa: F401
+#>     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/core/config_init.py", line 31, in <module>
+#>     from pandas.errors import Pandas4Warning
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/errors/__init__.py", line 8, in <module>
+#>     import ctypes
+#>   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in <module>
+#>     from _ctypes import Union, Structure, Array
+#> ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
 ```

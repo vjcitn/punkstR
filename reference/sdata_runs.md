@@ -36,13 +36,22 @@ recorded `tiles2hex` and `topic_model` parameters.
 # Requires a Python interpreter with spatialdata; skipped otherwise.
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/Rtmp9cP0D1/demo.zarr' already exists
+#> Warning: '/tmp/RtmpttWHGi/demo.zarr' already exists
 tryCatch(
     sdata_runs(store),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: punkst_to_sdata.py list failed with exit status 1. Last log lines (/tmp/Rtmp9cP0D1/runs1aa468efaf62.log):
+#> spatialdata not available: punkst_to_sdata.py list failed with exit status 1. Last log lines (/tmp/RtmpttWHGi/runs1a704ab78dea.log):
 #> Traceback (most recent call last):
-#>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 16, in <module>
-#>     import numpy as np
-#> ModuleNotFoundError: No module named 'numpy'
+#>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 17, in <module>
+#>     import pandas as pd
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/__init__.py", line 44, in <module>
+#>     import pandas.core.config_init  # pyright: ignore[reportUnusedImport] # noqa: F401
+#>     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/core/config_init.py", line 31, in <module>
+#>     from pandas.errors import Pandas4Warning
+#>   File "/opt/punkst-venv/lib/python3.12/site-packages/pandas/errors/__init__.py", line 8, in <module>
+#>     import ctypes
+#>   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in <module>
+#>     from _ctypes import Union, Structure, Array
+#> ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
 ```

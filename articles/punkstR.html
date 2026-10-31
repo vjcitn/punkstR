@@ -74,8 +74,8 @@
 <span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_punkst_setup.html">check_punkst_setup</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>punkst binary : OK      /home/runner/work/punkstR/punkstR/punkst-0.1.2-linux-x86_64-glibc2.28/bin/punkst
-python/sdata  : MISSING /opt/hostedtoolcache/Python/3.12.15/x64/bin/python
-* /opt/hostedtoolcache/Python/3.12.15/x64/bin/python could not import spatialdata and zarr. Output: Traceback (most recent call last): |   File "&lt;string&gt;", line 1, in &lt;module&gt; | ModuleNotFoundError: No module named 'spatialdata'</code></pre>
+python/sdata  : MISSING /opt/punkst-venv/bin/python
+* /opt/punkst-venv/bin/python could not import spatialdata and zarr. Output:   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in &lt;module&gt; |     from _ctypes import Union, Structure, Array | ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">can_run</span> <span class="op">&lt;-</span> <span class="va">cfg</span><span class="op">@</span><span class="va">bin_ok</span> <span class="op">&amp;&amp;</span> <span class="va">cfg</span><span class="op">@</span><span class="va">python_ok</span></span>

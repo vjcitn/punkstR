@@ -25,8 +25,8 @@ cfg <- check_punkst_setup()
 ```
 
     punkst binary : OK      /home/runner/work/punkstR/punkstR/punkst-0.1.2-linux-x86_64-glibc2.28/bin/punkst
-    python/sdata  : MISSING /opt/hostedtoolcache/Python/3.12.15/x64/bin/python
-    * /opt/hostedtoolcache/Python/3.12.15/x64/bin/python could not import spatialdata and zarr. Output: Traceback (most recent call last): |   File "<string>", line 1, in <module> | ModuleNotFoundError: No module named 'spatialdata'
+    python/sdata  : MISSING /opt/punkst-venv/bin/python
+    * /opt/punkst-venv/bin/python could not import spatialdata and zarr. Output:   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/ctypes/__init__.py", line 8, in <module> |     from _ctypes import Union, Structure, Array | ImportError: /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
 
 ``` r
 
