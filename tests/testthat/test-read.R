@@ -42,31 +42,7 @@ test_that("match_xy matches on centres and rejects duplicate references", {
 
 test_that("sdata_info summarises a synthetic store", {
     py <- Sys.getenv("PUNKST_PYTHON")
-    message("DIAG PUNKST_PYTHON=", py, " exists=", file.exists(py), " HOME=", Sys.getenv("HOME"),
-            " LD_LIBRARY_PATH=", Sys.getenv("LD_LIBRARY_PATH"))
-    message("DIAG ldd_ctypes: ", paste(suppressWarnings(system2("ldd",
-            "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so",
-            stdout = TRUE, stderr = TRUE)), collapse = " | "))
-    realpy <- suppressWarnings(system2("readlink", c("-f", py), stdout = TRUE, stderr = TRUE))
-    message("DIAG realpy=", paste(realpy, collapse = " "),
-            " sha256=", paste(suppressWarnings(system2("sha256sum", realpy, stdout = TRUE, stderr = TRUE)), collapse = " "))
-    message("DIAG ldd_python: ", paste(suppressWarnings(system2("ldd", realpy,
-            stdout = TRUE, stderr = TRUE)), collapse = " | "))
-    libpy <- suppressWarnings(system2("sh", c("-c", shQuote(paste0(
-        "ldd ", realpy, " | grep libpython | awk '{print $3}'"))),
-        stdout = TRUE, stderr = TRUE))
-    message("DIAG resolved libpython=", paste(libpy, collapse = " "))
-    message("DIAG nm_symbol_in_libpython: ", paste(suppressWarnings(system2("sh", c("-c",
-            shQuote(paste0("nm -D '", libpy, "' 2>&1 | grep -i PyErr_SetLocaleString || echo NOT_FOUND"))),
-            stdout = TRUE, stderr = TRUE)), collapse = " | "))
     skip_if(!nzchar(py) || !file.exists(py), "PUNKST_PYTHON not set")
-    diag2 <- suppressWarnings(system2(py, c("-c", shQuote(
-        "import sys, os, site; print('prefix', sys.prefix, sys.base_prefix, sys.exec_prefix); print('pyenv', {k:v for k,v in os.environ.items() if k.startswith('PYTHON')}); print('flags', sys.flags); print('path', sys.path)")),
-        stdout = TRUE, stderr = TRUE))
-    message("DIAG sys.path dump: ", paste(diag2, collapse = " || "))
-    diag <- suppressWarnings(system2(py, c("-c", shQuote("import spatialdata")),
-                                      stdout = TRUE, stderr = TRUE))
-    message("DIAG import status=", attr(diag, "status"), " out=", paste(diag, collapse = " | "))
     skip_if(system2(py, c("-c", shQuote("import spatialdata")), stdout = FALSE,
                     stderr = FALSE) != 0, "spatialdata not importable")
     d <- tempfile(); dir.create(d)
