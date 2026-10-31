@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">punkstR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.99.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.99.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,21 +114,21 @@ python/sdata  : OK      /opt/punkst-venv/bin/python-preload (spatialdata 0.8.0, 
 <span><span class="va">run2</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;punkstRun&gt;
-  source     : /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/demo.zarr
-  transcripts: /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/transcripts.tsv
-&lt;punkstTiles&gt; in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
-  tsv       /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.tsv
-  index     /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.index
-  coord_range /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.coord_range.tsv
-  features  /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.features.tsv
-&lt;punkstHex&gt; in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
-  data      /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.txt
-  meta      /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.json
-  features  /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/tiled.features.tsv
-&lt;punkstModel&gt; in /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out
-  model     /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.model.tsv
-  results   /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.results.tsv
-  pseudobulk /tmp/Rtmp9Xtg80/punkstR_demo_1d225e6b3c9c/out/hex_12.k2.pseudobulk.tsv</code></pre>
+  source     : /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/demo.zarr
+  transcripts: /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/transcripts.tsv
+&lt;punkstTiles&gt; in /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out
+  tsv       /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/tiled.tsv
+  index     /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/tiled.index
+  coord_range /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/tiled.coord_range.tsv
+  features  /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/tiled.features.tsv
+&lt;punkstHex&gt; in /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out
+  data      /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/hex_12.txt
+  meta      /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/hex_12.json
+  features  /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/tiled.features.tsv
+&lt;punkstModel&gt; in /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out
+  model     /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/hex_12.k2.model.tsv
+  results   /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/hex_12.k2.results.tsv
+  pseudobulk /tmp/RtmpzeneDp/punkstR_demo_1cf55f476e11/out/hex_12.k2.pseudobulk.tsv</code></pre>
 </div>
 </div>
 <p>The result is a <code>punkstRun</code> object whose properties (<code>run2@hex</code>, <code>run2@model</code>, …) are stage objects holding file paths and the parameters used.</p>
@@ -143,7 +143,7 @@ python/sdata  : OK      /opt/punkst-venv/bin/python-preload (spatialdata 0.8.0, 
 A0 1463 331
 A1 1460 338
 A2 1452 328
-A3 1529 368</code></pre>
+A3 1529 367</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">topics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/punkst_read_topics.html">punkst_read_topics</a></span><span class="op">(</span><span class="va">run2</span><span class="op">@</span><span class="va">model</span><span class="op">)</span>    <span class="co"># one row per hexagon</span></span>
@@ -195,8 +195,8 @@ A3 1529 368</code></pre>
 <span><span class="va">cmp</span><span class="op">$</span><span class="va">pairs</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  topic_a topic_b    cosine
-1       0       2 0.9983926
-2       1       1 0.9965140</code></pre>
+1       0       2 0.9983708
+2       1       1 0.9965466</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cmp</span><span class="op">$</span><span class="va">agreement</span></span></code></pre></div>

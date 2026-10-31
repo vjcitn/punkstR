@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">punkstR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.99.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.99.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,15 @@
       <small>Source: <a href="https://github.com/vjcitn/punkstR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.99.2" id="punkstr-0992">punkstR 0.99.2<a class="anchor" aria-label="anchor" href="#punkstr-0992"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-99-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-99-2"></a></h3>
+<ul><li>
+<code><a href="../reference/punkst_topic_model.html">punkst_topic_model()</a></code> no longer requires a <code>.state.tsv</code> output: the released <code>punkst</code> binary (v0.1.2) never writes it (that output was added to <code>fit_lda.cpp</code> only after the v0.1.2 tag), so requiring it made the vignette and CI tests fail on every supported install. <code>state</code> is now included in the returned <code>files</code> only when the <code>punkst</code> build in use actually produced it, and the <code>punkstModel</code> validator no longer requires it.</li>
+<li>Fixed CI so the vignette and all <code>@examples</code> genuinely execute (rather than silently skipping) during <code>R CMD check</code>, and the <code>testthat</code> suite runs with zero skips.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.99.0" id="punkstr-0990">punkstR 0.99.0<a class="anchor" aria-label="anchor" href="#punkstr-0990"></a></h2>
 <div class="section level3">

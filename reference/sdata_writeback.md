@@ -123,11 +123,11 @@ model <- punkstModel(workdir = tempdir(),
     params = list())
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/RtmpyaloTj/demo.zarr' already exists
+#> Warning: '/tmp/RtmpNiRhoD/demo.zarr' already exists
 tryCatch(
     sdata_writeback(model, hex = hex, sdata = store),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: punkst_to_sdata.py write failed with exit status 1. Last log lines (/tmp/RtmpyaloTj/writeback1a9976287828.log):
+#> spatialdata not available: punkst_to_sdata.py write failed with exit status 1. Last log lines (/tmp/RtmpNiRhoD/writeback1a6e4931537f.log):
 #> Traceback (most recent call last):
 #>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 202, in <module>
 #>     r = write_run(a.target, a.run, a.hex, a.hex_json, a.results, a.model, params,
@@ -138,5 +138,5 @@ tryCatch(
 #>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 27, in read_hex
 #>     with open(meta_path) as fh:
 #>          ^^^^^^^^^^^^^^^
-#> FileNotFoundError: [Errno 2] No such file or directory: '/tmp/RtmpyaloTj/file1a9970d53ea9'
+#> FileNotFoundError: [Errno 2] No such file or directory: '/tmp/RtmpNiRhoD/file1a6e6c3469cd'
 ```
