@@ -50,7 +50,7 @@ tiles <- punkstTiles(workdir = tempdir(),
     files = list(tsv = "tiled.tsv", index = "tiled.index", features = "tiled.features.tsv"),
     params = list(tile_size = 500))
 tiles
-#> <punkstTiles> in /tmp/RtmpUztHlu
+#> <punkstTiles> in /tmp/Rtmpidow2X
 #>   tsv       tiled.tsv
 #>   index     tiled.index
 #>   features  tiled.features.tsv
