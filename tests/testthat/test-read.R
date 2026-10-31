@@ -45,7 +45,7 @@ test_that("sdata_info summarises a synthetic store", {
     message("DIAG PUNKST_PYTHON=", py, " exists=", file.exists(py), " HOME=", Sys.getenv("HOME"))
     skip_if(!nzchar(py) || !file.exists(py), "PUNKST_PYTHON not set")
     diag2 <- suppressWarnings(system2(py, c("-c", shQuote(
-        "import sys, os, site; print('HOME', os.environ.get('HOME')); print('sitepkgs', site.getsitepackages()); print('usersite', site.getusersitepackages()); print('path', sys.path)")),
+        "import sys, os, site; print('prefix', sys.prefix, sys.base_prefix, sys.exec_prefix); print('pyenv', {k:v for k,v in os.environ.items() if k.startswith('PYTHON')}); print('flags', sys.flags); print('path', sys.path)")),
         stdout = TRUE, stderr = TRUE))
     message("DIAG sys.path dump: ", paste(diag2, collapse = " || "))
     diag <- suppressWarnings(system2(py, c("-c", shQuote("import spatialdata")),
