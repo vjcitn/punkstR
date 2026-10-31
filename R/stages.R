@@ -68,9 +68,15 @@ run_stage <- function(workdir, name, params, inputs, outputs, run, overwrite) {
         t0 <- Sys.time()
         run()
         missing <- outputs[!file.exists(outputs)]
-        if (length(missing))
+        if (length(missing)) {
+            logf <- file.path(workdir, paste0(name, ".log"))
+            logtail <- if (file.exists(logf))
+                paste(utils::tail(readLines(logf, warn = FALSE), 30), collapse = "\n")
+            else "(no log file found)"
             stop(name, " finished but did not produce: ",
-                 paste(missing, collapse = ", "), call. = FALSE)
+                 paste(missing, collapse = ", "),
+                 "\nLast lines of ", logf, ":\n", logtail, call. = FALSE)
+        }
         man <- read_manifest(workdir)
         man[[name]] <- params
         saveRDS(man, manifest_path(workdir))
