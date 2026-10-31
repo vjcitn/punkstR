@@ -53,24 +53,11 @@ jobs:
           /opt/punkst-venv/bin/pip install --upgrade pip
           /opt/punkst-venv/bin/pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
           echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> "$GITHUB_ENV"
-          # A later step (setup-r-dependencies, apt-installing BiocCheck's
-          # system libs) rebuilds the ldconfig cache, which can shadow the
-          # toolcache's own libpython3.12.so.1.0 with an incompatible one
-          # found via a default search path -- surfacing as a ctypes
-          # "undefined symbol" only once that step has run. Pin
-          # LD_LIBRARY_PATH to the toolcache's lib dir so it keeps winning.
-          echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           /opt/punkst-venv/bin/python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
-          realpy="$(readlink -f /opt/punkst-venv/bin/python)"
-          echo "DIAG install-time realpy=${realpy} sha256=$(sha256sum "${realpy}")"
-          libpy="$(ldd "${realpy}" | grep libpython | awk '{print $3}')"
-          echo "DIAG install-time resolved libpython=${libpy}"
-          echo "DIAG install-time nm_symbol_in_libpython: $(nm -D "${libpy}" 2>&1 | grep -i PyErr_SetLocaleString || echo NOT_FOUND)"
           # rcmdcheck runs R CMD check in a sanitized subprocess that drops
           # arbitrary inherited env vars, so GITHUB_ENV alone isn't enough;
           # ~/.Renviron is read by R itself at startup and survives that.
           echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> ~/.Renviron
-          echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> ~/.Renviron
 
       # Prebuilt Linux binary from the upstream punkst releases; avoids a
       # from-source C++ build (cmake/TBB/etc.) just to run CI. The baseline
@@ -99,6 +86,21 @@ jobs:
             any::rcmdcheck
             bioc::BiocCheck
           needs: check
+
+      # setup-r-dependencies apt-installs BiocCheck's system libraries,
+      # which pulls in Ubuntu's own libpython3.12 package as a transitive
+      # dependency and re-exports its own LD_LIBRARY_PATH to $GITHUB_ENV
+      # (observed: /usr/lib/x86_64-linux-gnu ends up ahead of the
+      # toolcache's own lib dir). Since the venv python's extension
+      # modules resolve libpython3.12.so.1.0 via DT_RUNPATH (which
+      # LD_LIBRARY_PATH overrides), that shadows it with an older build
+      # missing a CPython-internal symbol ctypes needs, breaking every
+      # import that touches ctypes (pandas -> dask -> spatialdata). This
+      # step must run after setup-r-dependencies, so its own prepend is
+      # the last word by the time check-r-package starts.
+      - name: Keep the toolcache libpython ahead of any apt-installed one
+        run: echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+        shell: bash
 
       - uses: r-lib/actions/check-r-package@v2
         with:
