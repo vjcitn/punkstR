@@ -166,20 +166,20 @@ tryCatch(
     punkst_tiles2hex(tiles, hex_size = 50),
     error = function(e) message("punkst not available: ", conditionMessage(e)))
 #> [punkstR] tiles2hex_hexsize_50: running
-#> punkst not available: punkst tiles2hex failed with exit status 134. Last log lines (/tmp/RtmpbyYF5T/tiles2hex_hexsize_50.log):
-#>     --in-tsv [/tmp/RtmpbyYF5T/file1a599456f63],
-#>     --in-index [/tmp/RtmpbyYF5T/file1a5921c21972], --icol-x [0], --icol-y [1],
+#> punkst not available: punkst tiles2hex failed with exit status 134. Last log lines (/tmp/RtmploZoDv/tiles2hex_hexsize_50.log):
+#>     --in-tsv [/tmp/RtmploZoDv/file19831b7f6e46],
+#>     --in-index [/tmp/RtmploZoDv/file19836092d9d9], --icol-x [0], --icol-y [1],
 #>     --icol-z [-1], --icol-feature [2],
-#>     --feature-dict [/tmp/RtmpbyYF5T/file1a5957539fe8], --icol-int,
-#>     --bounding-boxes, --anchor-files, --radius, --hex-size [50],
-#>     --hex-grid-dist [-1], --bcc-size [-1], --bcc-grid-dist [-1],
-#>     --temp-dir [/tmp/RtmpbyYF5T/tmp_tiles2hex], --seed [-1], --threads [1],
-#>     --out [/tmp/RtmpbyYF5T/hexsize_50.txt], --randomize [false], --sort-mem,
+#>     --feature-dict [/tmp/RtmploZoDv/file1983e4d0adf], --icol-int, --bounding-boxes,
+#>     --anchor-files, --radius, --hex-size [50], --hex-grid-dist [-1],
+#>     --bcc-size [-1], --bcc-grid-dist [-1],
+#>     --temp-dir [/tmp/RtmploZoDv/tmp_tiles2hex], --seed [-1], --threads [1],
+#>     --out [/tmp/RtmploZoDv/hexsize_50.txt], --randomize [false], --sort-mem,
 #>     --use-internal-sort [false], --idf-q [95], --idf-power [0.3], --idf-min [0.1],
 #>     --idf-max [5], --min-count, --ignore-background [false], --verbose [1000000],
 #>     --debug [0]
 #> 
 #> terminate called after throwing an instance of 'std::runtime_error'
-#>   what():  [2026-10-31 14:24:15] ERROR: Error opening index file: /tmp/RtmpbyYF5T/file1a5921c21972
+#>   what():  [2026-10-31 14:28:36] ERROR: Error opening index file: /tmp/RtmploZoDv/file19836092d9d9
 #> Aborted (core dumped)
 ```
