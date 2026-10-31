@@ -41,9 +41,11 @@ jobs:
       # with spatialdata (no reticulate -- punkstR only ever shells out).
       - name: Install Python dependencies (spatialdata and friends)
         run: |
-          python -m pip install --upgrade pip
-          pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
-          echo "PUNKST_PYTHON=$(which python)" >> "$GITHUB_ENV"
+          set -euo pipefail
+          python -m venv /opt/punkst-venv
+          /opt/punkst-venv/bin/pip install --upgrade pip
+          /opt/punkst-venv/bin/pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
+          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> "$GITHUB_ENV"
 
       - name: Install punkst binary
         run: |

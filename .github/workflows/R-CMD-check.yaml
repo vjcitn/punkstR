@@ -36,17 +36,28 @@ jobs:
       # No reticulate: punkstR only ever shells out to Python with system2(),
       # so installing these into whatever interpreter PUNKST_PYTHON points at
       # is all the R side needs.
+      #
+      # A plain `pip install` into the bare hostedtoolcache interpreter looks
+      # fine right after this step (import succeeds here), but later, when
+      # rcmdcheck's test subprocess invokes that same absolute path via
+      # system2(), sys.path comes back with *no* site-packages directories
+      # at all even though sys.flags.no_site is 0 -- some context-dependent
+      # quirk in how this build's site.py resolves its install layout.
+      # A venv's interpreter carries its own pyvenv.cfg next to the binary
+      # and resolves its site-packages from that file alone, independent of
+      # caller context, so it isn't exposed to whatever that quirk is.
       - name: Install Python dependencies (spatialdata and friends)
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
-          pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
-          echo "PUNKST_PYTHON=$(which python)" >> "$GITHUB_ENV"
-          python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
+          python -m venv /opt/punkst-venv
+          /opt/punkst-venv/bin/pip install --upgrade pip
+          /opt/punkst-venv/bin/pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
+          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> "$GITHUB_ENV"
+          /opt/punkst-venv/bin/python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
           # rcmdcheck runs R CMD check in a sanitized subprocess that drops
           # arbitrary inherited env vars, so GITHUB_ENV alone isn't enough;
           # ~/.Renviron is read by R itself at startup and survives that.
-          echo "PUNKST_PYTHON=$(which python)" >> ~/.Renviron
+          echo "PUNKST_PYTHON=/opt/punkst-venv/bin/python" >> ~/.Renviron
 
       # Prebuilt Linux binary from the upstream punkst releases; avoids a
       # from-source C++ build (cmake/TBB/etc.) just to run CI. The baseline
