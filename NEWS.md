@@ -1,3 +1,18 @@
+# punkstR 0.99.2
+
+## Bug fixes
+
+* `punkst_topic_model()` no longer requires a `.state.tsv` output: the
+  released `punkst` binary (v0.1.2) never writes it (that output was added
+  to `fit_lda.cpp` only after the v0.1.2 tag), so requiring it made the
+  vignette and CI tests fail on every supported install. `state` is now
+  included in the returned `files` only when the `punkst` build in use
+  actually produced it, and the `punkstModel` validator no longer requires
+  it.
+* Fixed CI so the vignette and all `@examples` genuinely execute (rather
+  than silently skipping) during `R CMD check`, and the `testthat` suite
+  runs with zero skips.
+
 # punkstR 0.99.0
 
 ## New features

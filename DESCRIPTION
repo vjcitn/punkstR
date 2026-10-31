@@ -1,6 +1,6 @@
 Package: punkstR
 Title: Drive the 'punkst' Spatial Transcriptomics Pipeline from R
-Version: 0.99.0
+Version: 0.99.2
 Authors@R: person("Vincent", "Carey", email = "stvjc@channing.harvard.edu", role = c("aut", "cre"))
 Description: Checks for the required executables and files, then runs the
     'punkst' command line tools and a small Python export script with
