@@ -38,9 +38,11 @@ jobs:
       # is all the R side needs.
       - name: Install Python dependencies (spatialdata and friends)
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           pip install numpy pandas scipy "zarr>=3" "spatialdata>=0.7"
           echo "PUNKST_PYTHON=$(which python)" >> "$GITHUB_ENV"
+          python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
 
       # Prebuilt Linux binary from the upstream punkst releases; avoids a
       # from-source C++ build (cmake/TBB/etc.) just to run CI. The baseline
