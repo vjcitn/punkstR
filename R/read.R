@@ -13,6 +13,11 @@
 #' @return A list with `points` (per element: `columns`, `attrs`, `rows`,
 #'   `max_x`, `max_y`, `transformations`), `images` (pixel sizes at full
 #'   resolution), `shapes`, `tables` and `spatialdata_version`.
+#' @examples
+#' store <- file.path(tempdir(), "demo.zarr")
+#' dir.create(store)
+#' res <- tryCatch(sdata_info(store), error = function(e) NULL)
+#' res
 #' @export
 sdata_info <- function(sdata, points_key = "transcripts", python = NULL,
                        log = tempfile("sdata_info", fileext = ".log")) {
@@ -54,6 +59,10 @@ stage_file <- function(x, what, name) {
 #' @return A numeric matrix with genes in rows and topics in columns (column
 #'   names are the topic indices as written by punkst). Entries are the
 #'   pseudo-counts of each gene assigned to each topic.
+#' @examples
+#' f <- tempfile(fileext = ".model.tsv")
+#' writeLines(c("gene\t0\t1", "A0\t10\t1", "B0\t1\t10"), f)
+#' punkst_read_model(f)
 #' @export
 punkst_read_model <- function(model) {
     f <- stage_file(model, "punkstModel", "model")
@@ -70,6 +79,10 @@ punkst_read_model <- function(model) {
 #' @return A data frame with columns `key`, `x`, `y` and one column per topic
 #'   (named as written by punkst). The keys are random and not unique; match
 #'   hexagons by position with [match_xy()].
+#' @examples
+#' f <- tempfile(fileext = ".results.tsv")
+#' writeLines(c("key\tx\ty\t0\t1", "a\t1.5\t2.5\t0.9\t0.1", "b\t3.5\t4.5\t0.2\t0.8"), f)
+#' punkst_read_topics(f)
 #' @export
 punkst_read_topics <- function(model) {
     f <- stage_file(model, "punkstModel", "results")
@@ -89,6 +102,13 @@ punkst_read_topics <- function(model) {
 #' @return A list with `units`, a data frame of `key`, `x`, `y`, `nfeat`,
 #'   `total` per hexagon, and `counts`, a sparse `dgCMatrix` (hexagons x
 #'   genes) with gene names as column names.
+#' @examples
+#' d <- tempfile(); dir.create(d)
+#' hex_txt <- file.path(d, "hex_0.txt")
+#' writeLines(c("k1\t1.0\t2.0\t2\t3\t0 2\t1 1", "k2\t3.0\t4.0\t1\t1\t1 1"), hex_txt)
+#' hex_json <- file.path(d, "hex_0.json")
+#' jsonlite::write_json(list(dictionary = list(A0 = 0, B0 = 1)), hex_json, auto_unbox = TRUE)
+#' punkst_read_hex(hex_txt)
 #' @export
 punkst_read_hex <- function(hex) {
     f <- stage_file(hex, "punkstHex", "data")
@@ -118,6 +138,10 @@ punkst_read_hex <- function(hex) {
 #'
 #' @param tiles A `punkstTiles` object, or the path to `tiled.features.tsv`.
 #' @return A data frame with `feature` and `count`.
+#' @examples
+#' f <- tempfile(fileext = ".features.tsv")
+#' writeLines(c("A0\t120", "B0\t95"), f)
+#' punkst_read_features(f)
 #' @export
 punkst_read_features <- function(tiles) {
     f <- stage_file(tiles, "punkstTiles", "features")
@@ -136,6 +160,8 @@ punkst_read_features <- function(tiles) {
 #' @param digits Decimal places used when comparing coordinates.
 #' @return An integer vector, for each `(x, y)` the index into the reference,
 #'   or `NA` if not found.
+#' @examples
+#' match_xy(x = c(1.001, 5), y = c(2.002, 6), ref_x = c(1, 3), ref_y = c(2, 4))
 #' @export
 match_xy <- function(x, y, ref_x, ref_y, digits = 3L) {
     k <- function(a, b) paste(formatC(round(a, digits), format = "f", digits = digits),

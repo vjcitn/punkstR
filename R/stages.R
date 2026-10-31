@@ -97,6 +97,9 @@ require_bin <- function(bin) {
 #' (`antisense_*`, `NegControl*`, `BLANK_*`, `UnassignedCodeword*`). Pass it as
 #' `exclude_feature_regex` to [punkst_topic_model()].
 #' @return A character string.
+#' @examples
+#' xenium_control_regex()
+#' grepl(xenium_control_regex(), c("BLANK_0001", "A0"))
 #' @export
 xenium_control_regex <- function() "^(antisense_|NegControl|BLANK_|UnassignedCodeword)"
 
@@ -149,6 +152,13 @@ xenium_control_regex <- function() "^(antisense_|NegControl|BLANK_|UnassignedCod
 #' @param overwrite Re-run even if up to date.
 #' @return A `punkstTiles` stage object with the output `files` (`tsv`,
 #'   `index`, `coord_range`, and `features` when a feature column is given).
+#' @examples
+#' # Requires the 'punkst' binary (see check_punkst_setup()); skipped otherwise.
+#' tsv <- tempfile(fileext = ".tsv")
+#' writeLines(c("1\t1\tA0", "2\t2\tB0"), tsv)
+#' tryCatch(
+#'     punkst_pts2tiles(tsv, tempfile(), tile_size = 500),
+#'     error = function(e) message("punkst not available: ", conditionMessage(e)))
 #' @export
 punkst_pts2tiles <- function(tsv, workdir, tile_size,
         icol_x = 0L, icol_y = 1L, icol_feature = 2L, icol_z = NULL,
@@ -252,6 +262,14 @@ punkst_pts2tiles <- function(tsv, workdir, tile_size,
 #' @param overwrite Re-run even if up to date.
 #' @return A `punkstHex` stage object; `files$data`, `files$meta` and
 #'   `files$features` feed [punkst_topic_model()].
+#' @examples
+#' # Requires the 'punkst' binary (see check_punkst_setup()); skipped otherwise.
+#' tiles <- punkstTiles(workdir = tempdir(),
+#'     files = list(tsv = tempfile(), index = tempfile(), features = tempfile()),
+#'     params = list(icol_x = 0L, icol_y = 1L, icol_feature = 2L))
+#' tryCatch(
+#'     punkst_tiles2hex(tiles, hex_size = 50),
+#'     error = function(e) message("punkst not available: ", conditionMessage(e)))
 #' @export
 punkst_tiles2hex <- function(tiles, hex_grid_dist = NULL, hex_size = NULL,
         bcc_grid_dist = NULL, bcc_size = NULL,
@@ -430,6 +448,13 @@ opt_arg <- function(args, flag, value, default = NULL) {
 #'   topics) and `state` always, plus `results` (per-unit topic proportions)
 #'   and `pseudobulk` when the transform ran, and `unit_stats` when
 #'   `residuals` is on.
+#' @examples
+#' # Requires the 'punkst' binary (see check_punkst_setup()); skipped otherwise.
+#' hex <- punkstHex(workdir = tempdir(),
+#'     files = list(data = tempfile(), meta = tempfile()), params = list())
+#' tryCatch(
+#'     punkst_topic_model(hex, n_topics = 2L),
+#'     error = function(e) message("punkst not available: ", conditionMessage(e)))
 #' @export
 punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
         out_prefix = NULL, seed = -1L, threads = 0L,
@@ -587,6 +612,13 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
 #' @return A `punkstRun` object with elements `transcripts`, `tiles`, `hex`,
 #'   `model` and `source` (the store, points element and coordinate system used
 #'   for export, which [sdata_writeback()] reuses).
+#' @examples
+#' # Requires the 'punkst' binary and a Python with spatialdata; skipped otherwise.
+#' tryCatch(
+#'     run_punkst_pipeline(file.path(tempdir(), "demo.zarr"), tempfile(),
+#'         topic_model = list(n_topics = 2L)),
+#'     error = function(e) message("pipeline dependencies not available: ",
+#'                                 conditionMessage(e)))
 #' @export
 run_punkst_pipeline <- function(sdata, workdir, export = list(),
         pts2tiles = list(), tiles2hex = list(), topic_model = list(),

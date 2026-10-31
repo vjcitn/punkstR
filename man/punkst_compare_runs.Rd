@@ -26,3 +26,13 @@ assignments are also compared under that pairing.
 Works on files, so it needs no Python: give \code{punkstRun}/\code{punkstModel}
 objects or paths to \verb{*.model.tsv}.
 }
+\examples{
+a <- tempfile(fileext = ".model.tsv")
+b <- tempfile(fileext = ".model.tsv")
+writeLines(c("gene\t0\t1", "A0\t10\t1", "B0\t1\t10"), a)
+writeLines(c("gene\t0\t1", "A0\t9\t1", "B0\t1\t9"), b)
+# Bare model paths have no matching *.results.tsv, so only the topic
+# similarity (not the per-hexagon agreement) can be computed here.
+cmp <- punkst_compare_runs(a, b)
+cmp$pairs
+}

@@ -43,6 +43,18 @@
 #' @param log Log file.
 #' @return The path of the store written to (invisibly), with attributes
 #'   `run`, `shapes`, `table`.
+#' @examples
+#' # Requires a Python interpreter with spatialdata; skipped otherwise.
+#' hex <- punkstHex(workdir = tempdir(),
+#'     files = list(data = tempfile(), meta = tempfile()), params = list())
+#' model <- punkstModel(workdir = tempdir(),
+#'     files = list(model = tempfile(), state = tempfile(), results = tempfile()),
+#'     params = list())
+#' store <- file.path(tempdir(), "demo.zarr")
+#' dir.create(store)
+#' tryCatch(
+#'     sdata_writeback(model, hex = hex, sdata = store),
+#'     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
 #' @export
 sdata_writeback <- function(run, hex = NULL, sdata = NULL, out = NULL,
                             in_place = FALSE, name = NULL, points_key = NULL,
@@ -97,6 +109,13 @@ sdata_writeback <- function(run, hex = NULL, sdata = NULL, out = NULL,
 #' @return A data frame with one row per run: `run`, `table`, `n_hexagons`,
 #'   `n_genes`, `n_topics`, `hex_size` and a list column `params` holding the
 #'   recorded `tiles2hex` and `topic_model` parameters.
+#' @examples
+#' # Requires a Python interpreter with spatialdata; skipped otherwise.
+#' store <- file.path(tempdir(), "demo.zarr")
+#' dir.create(store)
+#' tryCatch(
+#'     sdata_runs(store),
+#'     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
 #' @export
 sdata_runs <- function(sdata, python = NULL, log = tempfile("runs", fileext = ".log")) {
     if (!dir.exists(sdata)) stop("SpatialData store not found: ", sdata, call. = FALSE)
@@ -137,6 +156,15 @@ sdata_runs <- function(sdata, python = NULL, log = tempfile("runs", fileext = ".
 #'   `similarity` (full topic x topic cosine matrix), `n_shared_genes`,
 #'   and, when the grids match, `agreement` (fraction of shared hexagons whose
 #'   top topics are paired) and `n_shared_hexagons`.
+#' @examples
+#' a <- tempfile(fileext = ".model.tsv")
+#' b <- tempfile(fileext = ".model.tsv")
+#' writeLines(c("gene\t0\t1", "A0\t10\t1", "B0\t1\t10"), a)
+#' writeLines(c("gene\t0\t1", "A0\t9\t1", "B0\t1\t9"), b)
+#' # Bare model paths have no matching *.results.tsv, so only the topic
+#' # similarity (not the per-hexagon agreement) can be computed here.
+#' cmp <- punkst_compare_runs(a, b)
+#' cmp$pairs
 #' @export
 punkst_compare_runs <- function(a, b) {
     ma <- if (S7_inherits(a, punkstRun)) a@model else a
@@ -156,18 +184,20 @@ punkst_compare_runs <- function(a, b) {
         W[k[1], ] <- -Inf; W[, k[2]] <- -Inf
     }
     out <- list(pairs = pairs, similarity = S, n_shared_genes = length(g))
-    ra <- try(punkst_read_topics(ma), silent = TRUE)
-    rb <- try(punkst_read_topics(mb), silent = TRUE)
-    if (!inherits(ra, "try-error") && !inherits(rb, "try-error")) {
+    agreement <- try({
+        ra <- punkst_read_topics(ma); rb <- punkst_read_topics(mb)
         m <- match_xy(ra$x, ra$y, rb$x, rb$y)
         ok <- !is.na(m)
         if (any(ok)) {
             top <- function(d) colnames(d)[-(1:3)][max.col(as.matrix(d[, -(1:3)]), "first")]
             ta <- top(ra)[ok]; tb <- top(rb)[m[ok]]
             paired <- pairs$topic_b[match(ta, pairs$topic_a)]
-            out$agreement <- mean(paired == tb, na.rm = TRUE)
-            out$n_shared_hexagons <- sum(ok)
+            list(agreement = mean(paired == tb, na.rm = TRUE), n_shared_hexagons = sum(ok))
         }
+    }, silent = TRUE)
+    if (!inherits(agreement, "try-error") && !is.null(agreement)) {
+        out$agreement <- agreement$agreement
+        out$n_shared_hexagons <- agreement$n_shared_hexagons
     }
     out
 }

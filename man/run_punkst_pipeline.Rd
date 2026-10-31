@@ -50,3 +50,11 @@ lists: \code{tile_size = 500}; \code{hex_grid_dist = 12}, \code{min_count = 20},
 \code{randomize = TRUE}, \code{seed = 1}; \code{n_topics = 12}, \code{seed = 1}. \code{threads}
 applies to all three punkst stages.
 }
+\examples{
+# Requires the 'punkst' binary and a Python with spatialdata; skipped otherwise.
+tryCatch(
+    run_punkst_pipeline(file.path(tempdir(), "demo.zarr"), tempfile(),
+        topic_model = list(n_topics = 2L)),
+    error = function(e) message("pipeline dependencies not available: ",
+                                conditionMessage(e)))
+}

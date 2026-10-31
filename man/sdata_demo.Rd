@@ -43,3 +43,9 @@ makes it a fast fixture for the vignette and for trying the pipeline
 (seconds, a few MB). Coordinates live in one identity-registered coordinate
 system, \code{global}.
 }
+\examples{
+# Requires a Python interpreter with spatialdata; skipped otherwise.
+tryCatch(
+    sdata_demo(file.path(tempdir(), "demo.zarr"), n_points = 200L),
+    error = function(e) message("spatialdata not available: ", conditionMessage(e)))
+}

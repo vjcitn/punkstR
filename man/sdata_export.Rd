@@ -55,3 +55,11 @@ microns while the registered \code{global} coordinate system is image pixels, so
 the default \code{coordinate_system = "intrinsic"} exports microns as punkst
 expects.
 }
+\examples{
+# Requires a Python interpreter with spatialdata; skipped otherwise.
+store <- file.path(tempdir(), "demo.zarr")
+dir.create(store)
+tryCatch(
+    sdata_export(store, tempfile(fileext = ".tsv")),
+    error = function(e) message("spatialdata not available: ", conditionMessage(e)))
+}

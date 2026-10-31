@@ -24,3 +24,6 @@ use \code{\link[=check_punkst_setup]{check_punkst_setup()}}.
 Resolution order when an argument is \code{NULL}: the option, then the
 environment variable (\code{PUNKST}, \code{PUNKST_PYTHON}), then the \code{PATH}.
 }
+\examples{
+punkst_setup()
+}

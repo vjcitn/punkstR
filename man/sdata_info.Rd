@@ -32,3 +32,9 @@ Runs the bundled \code{sdata_info.py} with \code{system2()} and reads the JSON i
 writes. Useful for checking which coordinate system holds microns before
 exporting.
 }
+\examples{
+store <- file.path(tempdir(), "demo.zarr")
+dir.create(store)
+res <- tryCatch(sdata_info(store), error = function(e) NULL)
+res
+}

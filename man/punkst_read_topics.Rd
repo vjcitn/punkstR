@@ -18,3 +18,8 @@ hexagons by position with \code{\link[=match_xy]{match_xy()}}.
 \description{
 Read per-hexagon topic probabilities
 }
+\examples{
+f <- tempfile(fileext = ".results.tsv")
+writeLines(c("key\tx\ty\t0\t1", "a\t1.5\t2.5\t0.9\t0.1", "b\t3.5\t4.5\t0.2\t0.8"), f)
+punkst_read_topics(f)
+}

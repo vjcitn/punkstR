@@ -23,6 +23,13 @@
 #' @param python Interpreter override; see [punkst_setup()].
 #' @param log Log file for the script's output.
 #' @return The output path, invisibly.
+#' @examples
+#' # Requires a Python interpreter with spatialdata; skipped otherwise.
+#' store <- file.path(tempdir(), "demo.zarr")
+#' dir.create(store)
+#' tryCatch(
+#'     sdata_export(store, tempfile(fileext = ".tsv")),
+#'     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
 #' @export
 sdata_export <- function(sdata, out, points_key = "transcripts",
                          coordinate_system = "intrinsic", min_qv = NULL,

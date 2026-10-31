@@ -27,6 +27,8 @@
 #' @param bin Path to the `punkst` binary.
 #' @param python Path to a Python interpreter that has `spatialdata` installed.
 #' @return The resolved settings, invisibly, as a list.
+#' @examples
+#' punkst_setup()
 #' @export
 punkst_setup <- function(bin = NULL, python = NULL) {
     if (!is.null(bin)) options(punkstR.bin = path.expand(bin))
@@ -103,6 +105,9 @@ run_tool <- function(command, args, log, what = basename(command)) {
 #' @param quiet If `FALSE`, print a summary.
 #' @return A [punkstConfig] object with properties `bin`, `python`,
 #'   `bin_ok`, `python_ok`, `spatialdata_version`, `zarr_version`, `notes`.
+#' @examples
+#' cfg <- check_punkst_setup(quiet = TRUE)
+#' cfg
 #' @export
 check_punkst_setup <- function(bin = NULL, python = NULL, quiet = FALSE) {
     bin <- resolve_bin(bin)

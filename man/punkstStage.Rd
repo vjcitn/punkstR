@@ -35,3 +35,9 @@ Common structure of the objects returned by \code{\link[=punkst_pts2tiles]{punks
 \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}} and \code{\link[=punkst_topic_model]{punkst_topic_model()}}. \code{punkstStage} itself is
 abstract; use the subclasses \code{punkstTiles}, \code{punkstHex} and \code{punkstModel}.
 }
+\examples{
+tiles <- punkstTiles(workdir = tempdir(),
+    files = list(tsv = "tiled.tsv", index = "tiled.index", features = "tiled.features.tsv"),
+    params = list(tile_size = 500))
+tiles
+}

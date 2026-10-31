@@ -21,3 +21,6 @@ or \code{NA} if not found.
 The random keys in punkst's outputs are not unique, so hexagons in the
 results file and the count file are matched on their (x, y) centres.
 }
+\examples{
+match_xy(x = c(1.001, 5), y = c(2.002, 6), ref_x = c(1, 3), ref_y = c(2, 4))
+}

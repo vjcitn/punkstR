@@ -14,3 +14,7 @@ Matches the control probes and codewords in Xenium transcript tables
 (\verb{antisense_*}, \verb{NegControl*}, \verb{BLANK_*}, \verb{UnassignedCodeword*}). Pass it as
 \code{exclude_feature_regex} to \code{\link[=punkst_topic_model]{punkst_topic_model()}}.
 }
+\examples{
+xenium_control_regex()
+grepl(xenium_control_regex(), c("BLANK_0001", "A0"))
+}

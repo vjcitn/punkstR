@@ -106,3 +106,11 @@ and an option is passed only when it differs from its default, except that
 the column indices default to 0, 1 and 2 (x, y, feature), the layout
 written by \code{\link[=sdata_export]{sdata_export()}}, where punkst has no default.
 }
+\examples{
+# Requires the 'punkst' binary (see check_punkst_setup()); skipped otherwise.
+tsv <- tempfile(fileext = ".tsv")
+writeLines(c("1\t1\tA0", "2\t2\tB0"), tsv)
+tryCatch(
+    punkst_pts2tiles(tsv, tempfile(), tile_size = 500),
+    error = function(e) message("punkst not available: ", conditionMessage(e)))
+}

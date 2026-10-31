@@ -23,3 +23,15 @@ The result of \code{\link[=run_punkst_pipeline]{run_punkst_pipeline()}}: the exp
 three stage objects, and where the data came from (needed by
 \code{\link[=sdata_writeback]{sdata_writeback()}} to align results with the source store).
 }
+\examples{
+tiles <- punkstTiles(workdir = tempdir(),
+    files = list(tsv = "t.tsv", index = "t.index", features = "t.features.tsv"),
+    params = list())
+hex <- punkstHex(workdir = tempdir(),
+    files = list(data = "hex.txt", meta = "hex.json"), params = list())
+model <- punkstModel(workdir = tempdir(),
+    files = list(model = "m.model.tsv", state = "m.state"), params = list())
+run <- punkstRun(transcripts = "transcripts.tsv", tiles = tiles, hex = hex,
+    model = model, source = list(sdata = "demo.zarr", points_key = "transcripts"))
+run
+}

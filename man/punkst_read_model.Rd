@@ -18,3 +18,8 @@ pseudo-counts of each gene assigned to each topic.
 \description{
 Read the fitted gene x topic matrix
 }
+\examples{
+f <- tempfile(fileext = ".model.tsv")
+writeLines(c("gene\t0\t1", "A0\t10\t1", "B0\t1\t10"), f)
+punkst_read_model(f)
+}

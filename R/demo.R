@@ -16,6 +16,11 @@
 #' @param python Interpreter override; see [punkst_setup()].
 #' @param log Log file.
 #' @return `out`, invisibly.
+#' @examples
+#' # Requires a Python interpreter with spatialdata; skipped otherwise.
+#' tryCatch(
+#'     sdata_demo(file.path(tempdir(), "demo.zarr"), n_points = 200L),
+#'     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
 #' @export
 sdata_demo <- function(out, n_points = 60000L, size = 200, n_genes = 20L, seed = 0L,
                        overwrite = FALSE, python = NULL,

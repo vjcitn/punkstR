@@ -18,3 +18,11 @@ genes) with gene names as column names.
 \description{
 Parses the sparse text file written by \code{\link[=punkst_tiles2hex]{punkst_tiles2hex()}}.
 }
+\examples{
+d <- tempfile(); dir.create(d)
+hex_txt <- file.path(d, "hex_0.txt")
+writeLines(c("k1\t1.0\t2.0\t2\t3\t0 2\t1 1", "k2\t3.0\t4.0\t1\t1\t1 1"), hex_txt)
+hex_json <- file.path(d, "hex_0.json")
+jsonlite::write_json(list(dictionary = list(A0 = 0, B0 = 1)), hex_json, auto_unbox = TRUE)
+punkst_read_hex(hex_txt)
+}

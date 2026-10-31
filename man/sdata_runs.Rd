@@ -21,3 +21,11 @@ recorded \code{tiles2hex} and \code{topic_model} parameters.
 \description{
 List the punkst runs stored in a SpatialData store
 }
+\examples{
+# Requires a Python interpreter with spatialdata; skipped otherwise.
+store <- file.path(tempdir(), "demo.zarr")
+dir.create(store)
+tryCatch(
+    sdata_runs(store),
+    error = function(e) message("spatialdata not available: ", conditionMessage(e)))
+}

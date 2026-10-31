@@ -178,3 +178,11 @@ One deliberate difference: punkst does not run the transform by default,
 but the results file is what most users need, so \code{transform = TRUE} here.
 Note also that punkst does not sort topics unless \code{sort_topics = TRUE}.
 }
+\examples{
+# Requires the 'punkst' binary (see check_punkst_setup()); skipped otherwise.
+hex <- punkstHex(workdir = tempdir(),
+    files = list(data = tempfile(), meta = tempfile()), params = list())
+tryCatch(
+    punkst_topic_model(hex, n_topics = 2L),
+    error = function(e) message("punkst not available: ", conditionMessage(e)))
+}

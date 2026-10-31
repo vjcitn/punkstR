@@ -110,3 +110,12 @@ Give exactly the grid you need: \code{hex_grid_dist} or \code{hex_size} for 2D, 
 \code{bcc_grid_dist} or \code{bcc_size} (with \code{icol_z}) for 3D. punkst has no default
 size.
 }
+\examples{
+# Requires the 'punkst' binary (see check_punkst_setup()); skipped otherwise.
+tiles <- punkstTiles(workdir = tempdir(),
+    files = list(tsv = tempfile(), index = tempfile(), features = tempfile()),
+    params = list(icol_x = 0L, icol_y = 1L, icol_feature = 2L))
+tryCatch(
+    punkst_tiles2hex(tiles, hex_size = 50),
+    error = function(e) message("punkst not available: ", conditionMessage(e)))
+}

@@ -77,3 +77,16 @@ micron-to-pixel scale is preserved and the hexagons overlay the images and
 transcripts). If the export used a named coordinate system the shapes are
 registered in that system with an identity transformation.
 }
+\examples{
+# Requires a Python interpreter with spatialdata; skipped otherwise.
+hex <- punkstHex(workdir = tempdir(),
+    files = list(data = tempfile(), meta = tempfile()), params = list())
+model <- punkstModel(workdir = tempdir(),
+    files = list(model = tempfile(), state = tempfile(), results = tempfile()),
+    params = list())
+store <- file.path(tempdir(), "demo.zarr")
+dir.create(store)
+tryCatch(
+    sdata_writeback(model, hex = hex, sdata = store),
+    error = function(e) message("spatialdata not available: ", conditionMessage(e)))
+}

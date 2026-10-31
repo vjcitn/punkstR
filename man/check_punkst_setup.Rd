@@ -21,3 +21,7 @@ and reports what was found. It runs each tool once (\code{punkst --help} and a
 short \code{python -c} import) but never installs or builds anything. If the
 binary is missing, the message points to the build recipe.
 }
+\examples{
+cfg <- check_punkst_setup(quiet = TRUE)
+cfg
+}

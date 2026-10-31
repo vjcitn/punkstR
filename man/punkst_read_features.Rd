@@ -15,3 +15,8 @@ A data frame with \code{feature} and \code{count}.
 \description{
 Read the feature table written by pts2tiles
 }
+\examples{
+f <- tempfile(fileext = ".features.tsv")
+writeLines(c("A0\t120", "B0\t95"), f)
+punkst_read_features(f)
+}

@@ -41,3 +41,10 @@ Holds the punkst executable and Python interpreter that were resolved
 \code{punkstConfig} can be passed wherever a \code{bin} or \code{python} argument is
 accepted, in which case the corresponding path is used.
 }
+\examples{
+cfg <- punkstConfig(bin = NA_character_, python = NA_character_,
+    bin_ok = FALSE, python_ok = FALSE,
+    spatialdata_version = NA_character_, zarr_version = NA_character_,
+    notes = "example only")
+cfg
+}

@@ -38,6 +38,12 @@ NULL
 #' @param notes Character vector of actionable messages about what is missing
 #'   (never installs anything; points to the build recipe).
 #' @return A `punkstConfig` object; use `@` to read its properties.
+#' @examples
+#' cfg <- punkstConfig(bin = NA_character_, python = NA_character_,
+#'     bin_ok = FALSE, python_ok = FALSE,
+#'     spatialdata_version = NA_character_, zarr_version = NA_character_,
+#'     notes = "example only")
+#' cfg
 #' @export
 punkstConfig <- new_class("punkstConfig", package = NULL,
     properties = list(
@@ -67,6 +73,11 @@ punkstConfig <- new_class("punkstConfig", package = NULL,
 #'   also drive the skip-if-up-to-date manifest and are recorded by
 #'   [sdata_writeback()].
 #' @return An object of the respective subclass.
+#' @examples
+#' tiles <- punkstTiles(workdir = tempdir(),
+#'     files = list(tsv = "tiled.tsv", index = "tiled.index", features = "tiled.features.tsv"),
+#'     params = list(tile_size = 500))
+#' tiles
 #' @name punkstStage
 #' @export
 punkstStage <- new_class("punkstStage", package = NULL, abstract = TRUE,
@@ -105,6 +116,17 @@ punkstModel <- new_class("punkstModel", parent = punkstStage, package = NULL,
 #' @param source List with `sdata` (store path), `points_key` and
 #'   `coordinate_system` (as used for export; may be `NULL`).
 #' @return A `punkstRun` object.
+#' @examples
+#' tiles <- punkstTiles(workdir = tempdir(),
+#'     files = list(tsv = "t.tsv", index = "t.index", features = "t.features.tsv"),
+#'     params = list())
+#' hex <- punkstHex(workdir = tempdir(),
+#'     files = list(data = "hex.txt", meta = "hex.json"), params = list())
+#' model <- punkstModel(workdir = tempdir(),
+#'     files = list(model = "m.model.tsv", state = "m.state"), params = list())
+#' run <- punkstRun(transcripts = "transcripts.tsv", tiles = tiles, hex = hex,
+#'     model = model, source = list(sdata = "demo.zarr", points_key = "transcripts"))
+#' run
 #' @export
 punkstRun <- new_class("punkstRun", package = NULL,
     properties = list(transcripts = class_character, tiles = punkstTiles,
