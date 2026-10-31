@@ -123,11 +123,11 @@ model <- punkstModel(workdir = tempdir(),
     params = list())
 store <- file.path(tempdir(), "demo.zarr")
 dir.create(store)
-#> Warning: '/tmp/RtmpttWHGi/demo.zarr' already exists
+#> Warning: '/tmp/Rtmp0mSydy/demo.zarr' already exists
 tryCatch(
     sdata_writeback(model, hex = hex, sdata = store),
     error = function(e) message("spatialdata not available: ", conditionMessage(e)))
-#> spatialdata not available: punkst_to_sdata.py write failed with exit status 1. Last log lines (/tmp/RtmpttWHGi/writeback1a707344dfdc.log):
+#> spatialdata not available: punkst_to_sdata.py write failed with exit status 1. Last log lines (/tmp/Rtmp0mSydy/writeback1a76b5bd119.log):
 #> Traceback (most recent call last):
 #>   File "/home/runner/work/_temp/Library/punkstR/python/punkst_to_sdata.py", line 17, in <module>
 #>     import pandas as pd
