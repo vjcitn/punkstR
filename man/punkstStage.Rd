@@ -20,8 +20,8 @@ punkstModel(workdir = character(0), files = list(), params = list())
 
 \item{files}{Named list of output file paths. Required names: \code{punkstTiles}
 \code{tsv}, \code{index}, \code{features}; \code{punkstHex} \code{data}, \code{meta}; \code{punkstModel}
-\code{model}, \code{state} (plus \code{results} and \code{pseudobulk} when fitted with
-\code{transform = TRUE}).}
+\code{model} (plus \code{state} on punkst builds that write it, and \code{results} and
+\code{pseudobulk} when fitted with \code{transform = TRUE}).}
 
 \item{params}{Named list of the parameters that produced the outputs. These
 also drive the skip-if-up-to-date manifest and are recorded by

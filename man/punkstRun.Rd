@@ -30,7 +30,7 @@ tiles <- punkstTiles(workdir = tempdir(),
 hex <- punkstHex(workdir = tempdir(),
     files = list(data = "hex.txt", meta = "hex.json"), params = list())
 model <- punkstModel(workdir = tempdir(),
-    files = list(model = "m.model.tsv", state = "m.state"), params = list())
+    files = list(model = "m.model.tsv"), params = list())
 run <- punkstRun(transcripts = "transcripts.tsv", tiles = tiles, hex = hex,
     model = model, source = list(sdata = "demo.zarr", points_key = "transcripts"))
 run

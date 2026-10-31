@@ -67,8 +67,8 @@ punkstConfig <- new_class("punkstConfig", package = NULL,
 #' @param workdir Directory holding the stage's outputs.
 #' @param files Named list of output file paths. Required names: `punkstTiles`
 #'   `tsv`, `index`, `features`; `punkstHex` `data`, `meta`; `punkstModel`
-#'   `model`, `state` (plus `results` and `pseudobulk` when fitted with
-#'   `transform = TRUE`).
+#'   `model` (plus `state` on punkst builds that write it, and `results` and
+#'   `pseudobulk` when fitted with `transform = TRUE`).
 #' @param params Named list of the parameters that produced the outputs. These
 #'   also drive the skip-if-up-to-date manifest and are recorded by
 #'   [sdata_writeback()].
@@ -102,7 +102,7 @@ punkstHex <- new_class("punkstHex", parent = punkstStage, package = NULL,
 #' @rdname punkstStage
 #' @export
 punkstModel <- new_class("punkstModel", parent = punkstStage, package = NULL,
-    validator = function(self) .need_files(self@files, c("model", "state")))
+    validator = function(self) .need_files(self@files, "model"))
 
 #' One pipeline run
 #'
@@ -123,7 +123,7 @@ punkstModel <- new_class("punkstModel", parent = punkstStage, package = NULL,
 #' hex <- punkstHex(workdir = tempdir(),
 #'     files = list(data = "hex.txt", meta = "hex.json"), params = list())
 #' model <- punkstModel(workdir = tempdir(),
-#'     files = list(model = "m.model.tsv", state = "m.state"), params = list())
+#'     files = list(model = "m.model.tsv"), params = list())
 #' run <- punkstRun(transcripts = "transcripts.tsv", tiles = tiles, hex = hex,
 #'     model = model, source = list(sdata = "demo.zarr", points_key = "transcripts"))
 #' run

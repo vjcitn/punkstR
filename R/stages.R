@@ -451,9 +451,10 @@ opt_arg <- function(args, flag, value, default = NULL) {
 #' @param bin Path to `punkst`; see [punkst_setup()].
 #' @param overwrite Re-run even if the manifest shows the stage is up to date.
 #' @return A `punkstModel` stage object. `files` holds `model` (features x
-#'   topics) and `state` always, plus `results` (per-unit topic proportions)
-#'   and `pseudobulk` when the transform ran, and `unit_stats` when
-#'   `residuals` is on.
+#'   topics), `state` when the punkst build writes it (the current v0.1.2
+#'   release does not), `results` (per-unit topic proportions) and
+#'   `pseudobulk` when the transform ran, and `unit_stats` when `residuals`
+#'   is on.
 #' @examples
 #' # Requires the 'punkst' binary (see check_punkst_setup()); skipped otherwise.
 #' hex <- punkstHex(workdir = tempdir(),
@@ -500,8 +501,8 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
     if (is.null(out_prefix)) out_prefix <- file.path(workdir, paste0(stem, ".", tag))
 
     with_transform <- isTRUE(transform) || isTRUE(projection_only)
-    files <- list(model = paste0(out_prefix, ".model.tsv"),
-                  state = paste0(out_prefix, ".state.tsv"))
+    state_file <- paste0(out_prefix, ".state.tsv")
+    files <- list(model = paste0(out_prefix, ".model.tsv"))
     if (with_transform) {
         files$results <- paste0(out_prefix, ".results.tsv")
         files$pseudobulk <- paste0(out_prefix, ".pseudobulk.tsv")
@@ -591,6 +592,11 @@ punkst_topic_model <- function(hex, n_topics = NULL, n_epochs = 1L,
         unlist(files), overwrite = overwrite,
         run = function() run_tool(bin, a, file.path(workdir, paste0(name, ".log")),
                                   "punkst topic-model"))
+    # Written by newer punkst builds than the current v0.1.2 release, which
+    # keeps the fitted LDA state implicit in the model file instead; include
+    # it only when present, so this stays forward-compatible without
+    # requiring it from the release binary most installs will have.
+    if (file.exists(state_file)) files$state <- state_file
     punkstModel(workdir = workdir, files = files, params = params)
 }
 

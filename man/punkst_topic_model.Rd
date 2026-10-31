@@ -160,9 +160,10 @@ uses the system temporary directory.}
 }
 \value{
 A \code{punkstModel} stage object. \code{files} holds \code{model} (features x
-topics) and \code{state} always, plus \code{results} (per-unit topic proportions)
-and \code{pseudobulk} when the transform ran, and \code{unit_stats} when
-\code{residuals} is on.
+topics), \code{state} when the punkst build writes it (the current v0.1.2
+release does not), \code{results} (per-unit topic proportions) and
+\code{pseudobulk} when the transform ran, and \code{unit_stats} when \code{residuals}
+is on.
 }
 \description{
 Exposes the options of \verb{punkst topic-model} that apply to hexagon input
