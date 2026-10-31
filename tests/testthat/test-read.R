@@ -47,6 +47,12 @@ test_that("sdata_info summarises a synthetic store", {
     message("DIAG ldd_ctypes: ", paste(suppressWarnings(system2("ldd",
             "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so",
             stdout = TRUE, stderr = TRUE)), collapse = " | "))
+    realpy <- suppressWarnings(system2("readlink", c("-f", py), stdout = TRUE, stderr = TRUE))
+    message("DIAG realpy=", paste(realpy, collapse = " "),
+            " sha256=", paste(suppressWarnings(system2("sha256sum", realpy, stdout = TRUE, stderr = TRUE)), collapse = " "))
+    message("DIAG nm_symbol: ", paste(suppressWarnings(system2("sh", c("-c",
+            shQuote(paste0("nm -D ", realpy, " 2>&1 | grep -i PyErr_SetLocaleString"))),
+            stdout = TRUE, stderr = TRUE)), collapse = " | "))
     skip_if(!nzchar(py) || !file.exists(py), "PUNKST_PYTHON not set")
     diag2 <- suppressWarnings(system2(py, c("-c", shQuote(
         "import sys, os, site; print('prefix', sys.prefix, sys.base_prefix, sys.exec_prefix); print('pyenv', {k:v for k,v in os.environ.items() if k.startswith('PYTHON')}); print('flags', sys.flags); print('path', sys.path)")),

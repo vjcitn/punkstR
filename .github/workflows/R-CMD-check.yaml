@@ -61,6 +61,9 @@ jobs:
           # LD_LIBRARY_PATH to the toolcache's lib dir so it keeps winning.
           echo "LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.12.15/x64/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           /opt/punkst-venv/bin/python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
+          realpy="$(readlink -f /opt/punkst-venv/bin/python)"
+          echo "DIAG install-time realpy=${realpy} sha256=$(sha256sum "${realpy}")"
+          echo "DIAG install-time nm_symbol: $(nm -D "${realpy}" 2>&1 | grep -i PyErr_SetLocaleString || echo NOT_FOUND)"
           # rcmdcheck runs R CMD check in a sanitized subprocess that drops
           # arbitrary inherited env vars, so GITHUB_ENV alone isn't enough;
           # ~/.Renviron is read by R itself at startup and survives that.
