@@ -50,8 +50,14 @@ test_that("sdata_info summarises a synthetic store", {
     realpy <- suppressWarnings(system2("readlink", c("-f", py), stdout = TRUE, stderr = TRUE))
     message("DIAG realpy=", paste(realpy, collapse = " "),
             " sha256=", paste(suppressWarnings(system2("sha256sum", realpy, stdout = TRUE, stderr = TRUE)), collapse = " "))
-    message("DIAG nm_symbol: ", paste(suppressWarnings(system2("sh", c("-c",
-            shQuote(paste0("nm -D ", realpy, " 2>&1 | grep -i PyErr_SetLocaleString"))),
+    message("DIAG ldd_python: ", paste(suppressWarnings(system2("ldd", realpy,
+            stdout = TRUE, stderr = TRUE)), collapse = " | "))
+    libpy <- suppressWarnings(system2("sh", c("-c", shQuote(paste0(
+        "ldd ", realpy, " | grep libpython | awk '{print $3}'"))),
+        stdout = TRUE, stderr = TRUE))
+    message("DIAG resolved libpython=", paste(libpy, collapse = " "))
+    message("DIAG nm_symbol_in_libpython: ", paste(suppressWarnings(system2("sh", c("-c",
+            shQuote(paste0("nm -D '", libpy, "' 2>&1 | grep -i PyErr_SetLocaleString || echo NOT_FOUND"))),
             stdout = TRUE, stderr = TRUE)), collapse = " | "))
     skip_if(!nzchar(py) || !file.exists(py), "PUNKST_PYTHON not set")
     diag2 <- suppressWarnings(system2(py, c("-c", shQuote(

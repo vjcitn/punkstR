@@ -63,7 +63,9 @@ jobs:
           /opt/punkst-venv/bin/python -c "import spatialdata, zarr; print('spatialdata', spatialdata.__version__); print('zarr', zarr.__version__)"
           realpy="$(readlink -f /opt/punkst-venv/bin/python)"
           echo "DIAG install-time realpy=${realpy} sha256=$(sha256sum "${realpy}")"
-          echo "DIAG install-time nm_symbol: $(nm -D "${realpy}" 2>&1 | grep -i PyErr_SetLocaleString || echo NOT_FOUND)"
+          libpy="$(ldd "${realpy}" | grep libpython | awk '{print $3}')"
+          echo "DIAG install-time resolved libpython=${libpy}"
+          echo "DIAG install-time nm_symbol_in_libpython: $(nm -D "${libpy}" 2>&1 | grep -i PyErr_SetLocaleString || echo NOT_FOUND)"
           # rcmdcheck runs R CMD check in a sanitized subprocess that drops
           # arbitrary inherited env vars, so GITHUB_ENV alone isn't enough;
           # ~/.Renviron is read by R itself at startup and survives that.
